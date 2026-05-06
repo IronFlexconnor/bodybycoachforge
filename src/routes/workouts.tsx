@@ -96,9 +96,15 @@ function ActiveSession({ workout, onClose, onComplete }: { workout: Workout; onC
   const [startedAt] = useState(() => Date.now());
   const [logs, setLogs] = useState<Record<string, { reps: string; weight: string; rpe: string; done: boolean }[]>>({});
   const [finishing, setFinishing] = useState(false);
+  const [weightUnit, setWeightUnit] = useState<WeightUnit>(DEFAULT_WEIGHT_UNIT);
 
   useEffect(() => {
     if (!user) return;
+    supabase.from("profiles").select("units").eq("user_id", user.id).maybeSingle().then(({ data }) => {
+      if (data?.units === "metric" || data?.units === "imperial") {
+        setWeightUnit(unitsToWeightUnit(data.units));
+      }
+    });
     supabase.from("workout_logs").insert({ user_id: user.id, workout_id: workout.id }).select().single().then(({ data }) => {
       if (data) setLogId(data.id);
     });
