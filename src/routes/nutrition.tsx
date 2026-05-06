@@ -58,8 +58,13 @@ function Nutrition() {
     setSuggesting(true);
     try {
       const { data, error } = await supabase.functions.invoke("nutrition-coach", { body: { action: "suggest_meals" } });
+      const d: any = data;
+      if (d?.error === "limit_reached") {
+        setPaywall({ open: true, reason: d.message, recommend: "pro" });
+        return;
+      }
       if (error) throw error;
-      setSuggestions(data.meals ?? []);
+      setSuggestions(d?.meals ?? []);
     } catch { toast.error("Couldn't fetch suggestions"); } finally { setSuggesting(false); }
   };
 
@@ -67,8 +72,13 @@ function Nutrition() {
     setReviewing(true);
     try {
       const { data, error } = await supabase.functions.invoke("nutrition-coach", { body: { action: "review_day" } });
+      const d: any = data;
+      if (d?.error === "limit_reached") {
+        setPaywall({ open: true, reason: d.message, recommend: "pro" });
+        return;
+      }
       if (error) throw error;
-      setReview(data);
+      setReview(d);
     } catch { toast.error("Couldn't generate review"); } finally { setReviewing(false); }
   };
 
