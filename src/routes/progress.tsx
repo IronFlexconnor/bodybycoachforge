@@ -81,7 +81,7 @@ function Progress() {
           <p className="text-sm leading-relaxed text-foreground/90">
             {stats.workouts === 0
               ? "Log your first session to unlock personalized weekly reviews."
-              : `You've logged ${stats.workouts} sessions and moved ${(stats.volume / 1000).toFixed(1)}k kg of total volume. Open the chat for a full breakdown and recommendations.`}
+              : `You've logged ${stats.workouts} sessions and moved ${(displayVolume(stats.volume, units) / 1000).toFixed(1)}k ${weightLabel(units)} of total volume. Open the chat for a full breakdown and recommendations.`}
           </p>
         </div>
 
