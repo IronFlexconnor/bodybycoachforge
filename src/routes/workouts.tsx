@@ -178,7 +178,7 @@ function ActiveSession({ workout, onClose, onComplete }: { workout: Workout; onC
             </div>
             <div className="space-y-2">
               <div className="grid grid-cols-[24px_1fr_1fr_1fr_36px] items-center gap-2 px-1 text-[10px] uppercase tracking-wider text-muted-foreground">
-                <div>#</div><div>Weight</div><div>Reps</div><div>RPE</div><div></div>
+                <div>#</div><div>Weight ({weightUnit})</div><div>Reps</div><div>RPE</div><div></div>
               </div>
               {logs[ex.name]?.map((s, i) => (
                 <div key={i} className={cn("grid grid-cols-[24px_1fr_1fr_1fr_36px] items-center gap-2 rounded-lg p-1 transition-colors", s.done && "bg-primary/10")}>
