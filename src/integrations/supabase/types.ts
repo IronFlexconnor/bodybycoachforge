@@ -122,6 +122,48 @@ export type Database = {
         }
         Relationships: []
       }
+      meal_logs: {
+        Row: {
+          calories: number | null
+          carbs_g: number | null
+          created_at: string
+          eaten_at: string
+          fat_g: number | null
+          id: string
+          meal_type: string | null
+          name: string
+          notes: string | null
+          protein_g: number | null
+          user_id: string
+        }
+        Insert: {
+          calories?: number | null
+          carbs_g?: number | null
+          created_at?: string
+          eaten_at?: string
+          fat_g?: number | null
+          id?: string
+          meal_type?: string | null
+          name: string
+          notes?: string | null
+          protein_g?: number | null
+          user_id: string
+        }
+        Update: {
+          calories?: number | null
+          carbs_g?: number | null
+          created_at?: string
+          eaten_at?: string
+          fat_g?: number | null
+          id?: string
+          meal_type?: string | null
+          name?: string
+          notes?: string | null
+          protein_g?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
@@ -135,6 +177,7 @@ export type Database = {
           id: string
           injuries: string | null
           level: string | null
+          macro_targets: Json | null
           name: string | null
           onboarded: boolean | null
           session_length: number | null
@@ -156,6 +199,7 @@ export type Database = {
           id?: string
           injuries?: string | null
           level?: string | null
+          macro_targets?: Json | null
           name?: string | null
           onboarded?: boolean | null
           session_length?: number | null
@@ -177,6 +221,7 @@ export type Database = {
           id?: string
           injuries?: string | null
           level?: string | null
+          macro_targets?: Json | null
           name?: string | null
           onboarded?: boolean | null
           session_length?: number | null
@@ -185,6 +230,39 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weight?: number | null
+        }
+        Relationships: []
+      }
+      program_adjustments: {
+        Row: {
+          changes: Json
+          created_at: string
+          id: string
+          program_id: string | null
+          summary: string
+          trigger: string
+          user_id: string
+          workout_id: string | null
+        }
+        Insert: {
+          changes?: Json
+          created_at?: string
+          id?: string
+          program_id?: string | null
+          summary: string
+          trigger: string
+          user_id: string
+          workout_id?: string | null
+        }
+        Update: {
+          changes?: Json
+          created_at?: string
+          id?: string
+          program_id?: string | null
+          summary?: string
+          trigger?: string
+          user_id?: string
+          workout_id?: string | null
         }
         Relationships: []
       }

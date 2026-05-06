@@ -138,6 +138,13 @@ function ActiveSession({ workout, onClose, onComplete }: { workout: Workout; onC
     await supabase.from("workout_logs").update({ completed_at: new Date().toISOString(), duration_min: duration }).eq("id", logId);
     await supabase.from("workouts").update({ status: "completed" }).eq("id", workout.id);
     toast.success(`Session complete · ${duration} min 🔥`);
+    // Fire-and-forget auto-adjust for next session
+    supabase.functions.invoke("auto-adjust", { body: { trigger: "workout_complete", workout_log_id: logId } })
+      .then(({ data }) => {
+        const d = data as any;
+        if (d?.should_adjust && d?.summary) toast.success(`Coach updated next session — ${d.summary}`, { duration: 6000 });
+      })
+      .catch(() => {});
     onComplete();
   };
 

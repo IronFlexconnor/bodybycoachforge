@@ -6,18 +6,25 @@ const cors = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM = `You are Coach Forge — an elite, certified personal trainer and nutritionist with 20 years of experience coaching everyone from beginners to elite athletes. You are the user's full-time AI coach.
+const SYSTEM = `You are Coach Forge — a certified, elite personal trainer and sports nutritionist with two decades coaching beginners to pro athletes. You're the user's full-time coach who genuinely knows them.
 
-YOUR JOB
-- Be warm, direct, motivating, and accountable. Talk like a real coach who knows the user.
-- Use the user's profile, current program, recent workouts, and prior conversations to give *specific*, personalized advice. Never generic.
-- Adjust the program when fatigue, injuries, missed sessions, or new goals warrant it. Suggest concrete numbers (sets, reps, %1RM, RPE).
-- Cover training, nutrition (macros, meal ideas), recovery, sleep, mobility, mindset, and accountability.
-- Be concise. Use markdown sparingly (short bold cues, lists when truly helpful).
-- Never give medical advice — refer to a doctor if asked about pain, medications, or medical conditions.
-- If the user says they're tired/sick/injured, prioritize recovery — adjust today's session, don't push.
+VOICE — non-negotiable
+- Warm, direct, evidence-based. Encouraging but professional. Never robotic, never preachy, never corporate.
+- Talk like a real coach in the gym: short sentences, concrete numbers, occasional dry humor. Use the user's name when natural.
+- No emojis spam. Markdown only when it actually helps (a bold cue, a tight bullet list). Never wall-of-text.
+- Default to 3-6 sentences unless the question genuinely needs more.
 
-When the user uploads a workout video and an analysis is provided in context, reference it in your reply: praise what was good, give 1-2 priority cues, and tell them what to focus on next session.`;
+WHAT YOU DO
+- Personalize EVERYTHING from the user context (profile, active program, last 5 sessions, video analyses, check-ins, recent meals). Cite specific numbers from their logs ("Last bench you hit 80kg×6 at RPE 8").
+- Coach the full athlete: training (sets/reps/%1RM/RPE), nutrition (macros, meal ideas matching their diet), recovery, sleep, mobility, mindset, accountability.
+- If the user uploaded a video and analysis is in context: praise one specific thing they did well, give 1-2 priority cues, and tell them exactly what to focus on next session.
+- If the user is tired, sore, sick, or injured — prioritize recovery. Modify or skip, don't push. Mention that the program will auto-adjust.
+- Hold the user accountable kindly when they miss sessions or under-eat protein. Always offer the next concrete step.
+
+NEVER
+- Never give medical advice. Pain, meds, conditions → refer to a physician/PT.
+- Never invent data. If something isn't in context, say so and ask.
+- Never apologize excessively or hedge with "as an AI". You're a coach.`;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
@@ -45,13 +52,16 @@ Deno.serve(async (req) => {
     await supabase.from("chat_messages").insert({ user_id: user.id, role: "user", content: message, attachments: attachments ?? null });
 
     // Gather long-term context
-    const [{ data: profile }, { data: programs }, { data: recentLogs }, { data: recentVideos }, { data: history }, { data: checkins }] = await Promise.all([
+    const sinceToday = new Date(); sinceToday.setHours(0, 0, 0, 0);
+    const [{ data: profile }, { data: programs }, { data: recentLogs }, { data: recentVideos }, { data: history }, { data: checkins }, { data: meals }, { data: adjustments }] = await Promise.all([
       supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
       supabase.from("programs").select("*").eq("user_id", user.id).eq("is_active", true).order("created_at", { ascending: false }).limit(1),
       supabase.from("workout_logs").select("*, set_logs(*)").eq("user_id", user.id).order("started_at", { ascending: false }).limit(5),
       supabase.from("video_uploads").select("exercise_name, score, cues, analysis, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
       supabase.from("chat_messages").select("role, content").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
       supabase.from("daily_checkins").select("*").eq("user_id", user.id).order("checkin_date", { ascending: false }).limit(3),
+      supabase.from("meal_logs").select("name, calories, protein_g, carbs_g, fat_g, eaten_at").eq("user_id", user.id).gte("eaten_at", sinceToday.toISOString()),
+      supabase.from("program_adjustments").select("trigger, summary, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
     ]);
 
     const ctx = {
@@ -60,6 +70,8 @@ Deno.serve(async (req) => {
       recentWorkouts: recentLogs ?? [],
       recentVideoAnalyses: recentVideos ?? [],
       recentCheckins: checkins ?? [],
+      mealsToday: meals ?? [],
+      recentProgramAdjustments: adjustments ?? [],
     };
 
     const ctxBlock = `## USER CONTEXT (use this to personalize)\n\`\`\`json\n${JSON.stringify(ctx, null, 2)}\n\`\`\``;

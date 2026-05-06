@@ -129,6 +129,12 @@ function Chat() {
       await supabase.from("chat_messages").insert({ user_id: user.id, role: "assistant", content: summary });
       setMessages((m) => [...m, { role: "user", content: "📹 Uploaded a video for form check" }, { role: "assistant", content: summary }]);
       toast.success("Form analysis ready");
+      // Auto-adjust based on form feedback
+      supabase.functions.invoke("auto-adjust", { body: { trigger: "video_analysis" } })
+        .then(({ data }) => {
+          const d = data as any;
+          if (d?.should_adjust && d?.summary) toast.success(`Coach adjusted next session — ${d.summary}`, { duration: 6000 });
+        }).catch(() => {});
     } catch (e) {
       toast.dismiss("analyze");
       toast.error(e instanceof Error ? e.message : "Video analysis failed");
