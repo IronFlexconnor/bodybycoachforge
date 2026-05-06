@@ -100,6 +100,22 @@ function Home() {
           <CheckinCard onSaved={(c) => setCheckin(c)} />
         )}
 
+        {!isActive && !isTrialing && (
+          <Link
+            to="/pricing"
+            className="mb-6 flex items-center gap-3 rounded-2xl border border-primary/40 bg-gradient-to-r from-primary/15 to-primary/5 p-4 hover:border-primary/70"
+          >
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-primary text-primary-foreground shadow-glow">
+              <Crown className="h-5 w-5" />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-semibold">Unlock unlimited coaching</div>
+              <div className="text-[11px] text-muted-foreground">7-day free trial · Cancel anytime</div>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </Link>
+        )}
+
         {todayWorkout ? (
           <Link to="/workouts" className="group relative mb-6 block overflow-hidden rounded-3xl border border-primary/20 bg-gradient-card p-6 shadow-card">
             <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
