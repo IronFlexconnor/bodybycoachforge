@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { PaywallModal } from "@/components/PaywallModal";
 
 export const Route = createFileRoute("/nutrition")({
   head: () => ({ meta: [{ title: "Nutrition — Body Forge" }] }),
@@ -29,6 +30,7 @@ function Nutrition() {
   const [review, setReview] = useState<any>(null);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [form, setForm] = useState({ name: "", calories: "", protein_g: "", carbs_g: "", fat_g: "" });
+  const [paywall, setPaywall] = useState<{ open: boolean; reason?: string; recommend?: "pro" | "elite" }>({ open: false });
 
   useEffect(() => {
     if (loading) return;
@@ -58,8 +60,13 @@ function Nutrition() {
     setSuggesting(true);
     try {
       const { data, error } = await supabase.functions.invoke("nutrition-coach", { body: { action: "suggest_meals" } });
+      const d: any = data;
+      if (d?.error === "limit_reached") {
+        setPaywall({ open: true, reason: d.message, recommend: "pro" });
+        return;
+      }
       if (error) throw error;
-      setSuggestions(data.meals ?? []);
+      setSuggestions(d?.meals ?? []);
     } catch { toast.error("Couldn't fetch suggestions"); } finally { setSuggesting(false); }
   };
 
@@ -67,8 +74,13 @@ function Nutrition() {
     setReviewing(true);
     try {
       const { data, error } = await supabase.functions.invoke("nutrition-coach", { body: { action: "review_day" } });
+      const d: any = data;
+      if (d?.error === "limit_reached") {
+        setPaywall({ open: true, reason: d.message, recommend: "pro" });
+        return;
+      }
       if (error) throw error;
-      setReview(data);
+      setReview(d);
     } catch { toast.error("Couldn't generate review"); } finally { setReviewing(false); }
   };
 
@@ -229,6 +241,12 @@ function Nutrition() {
           </div>
         )}
       </div>
+      <PaywallModal
+        open={paywall.open}
+        onClose={() => setPaywall({ open: false })}
+        reason={paywall.reason}
+        recommend={paywall.recommend ?? "pro"}
+      />
     </AppShell>
   );
 }

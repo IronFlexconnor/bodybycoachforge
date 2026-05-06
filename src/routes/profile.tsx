@@ -1,11 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ChevronRight, Settings, Bell, Heart, Dumbbell, Apple, Shield, LogOut, Sparkles, Loader2 } from "lucide-react";
+import { ChevronRight, Settings, Bell, Heart, Dumbbell, Apple, Shield, LogOut, Sparkles, Loader2, Crown, CreditCard } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useSubscription } from "@/hooks/useSubscription";
+import { createPortalSession } from "@/utils/payments.functions";
+import { getStripeEnvironment, PLAN_BY_PRICE } from "@/lib/stripe";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — Body Forge" }] }),
@@ -18,6 +21,22 @@ function Profile() {
   const [p, setP] = useState<any>(null);
   const [program, setProgram] = useState<any>(null);
   const [regen, setRegen] = useState(false);
+  const [portalBusy, setPortalBusy] = useState(false);
+  const { sub, isActive, tier, isTrialing } = useSubscription();
+
+  const openPortal = async () => {
+    setPortalBusy(true);
+    try {
+      const url = await createPortalSession({
+        data: { environment: getStripeEnvironment(), returnUrl: window.location.href },
+      });
+      window.open(url, "_blank");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not open billing portal");
+    } finally {
+      setPortalBusy(false);
+    }
+  };
 
   useEffect(() => {
     if (loading) return;
@@ -76,6 +95,49 @@ function Profile() {
 
         <Section title="Nutrition">
           <Row icon={Apple} label="Diet preference" value={p.diet || "Not set"} />
+        </Section>
+
+        <Section title="Subscription">
+          {isActive && sub ? (
+            <>
+              <Row
+                icon={Crown}
+                label={`${tier === "elite" ? "Elite AI Coach" : "Pro Coach"}${isTrialing ? " · Trial" : ""}`}
+                value={
+                  sub.cancel_at_period_end
+                    ? `Ends ${sub.current_period_end ? new Date(sub.current_period_end).toLocaleDateString() : ""}`
+                    : sub.current_period_end
+                      ? `Renews ${new Date(sub.current_period_end).toLocaleDateString()}`
+                      : "Active"
+                }
+              />
+              <button
+                onClick={openPortal}
+                disabled={portalBusy}
+                className="flex w-full items-center gap-3 border-b border-border/40 px-4 py-3.5 text-left last:border-0 hover:bg-surface/60 disabled:opacity-50"
+              >
+                <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
+                  {portalBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
+                </div>
+                <div className="flex-1 text-sm font-medium">Manage subscription</div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => navigate({ to: "/pricing" })}
+              className="flex w-full items-center gap-3 px-4 py-3.5 text-left hover:bg-surface/60"
+            >
+              <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-primary text-primary-foreground shadow-glow">
+                <Crown className="h-4 w-4" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-semibold">Upgrade to Pro Coach</div>
+                <div className="text-[11px] text-muted-foreground">7-day free trial · Cancel anytime</div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
+          )}
         </Section>
 
         <Button onClick={regenerate} disabled={regen} className="mb-3 h-12 w-full rounded-xl bg-gradient-primary font-semibold text-primary-foreground shadow-glow">

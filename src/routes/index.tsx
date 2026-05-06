@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Flame, Play, MessageCircle, TrendingUp, Activity, Heart, Zap, ChevronRight, Loader2, Apple, Check } from "lucide-react";
+import { Flame, Play, MessageCircle, TrendingUp, Activity, Heart, Zap, ChevronRight, Loader2, Apple, Check, Crown } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/")({
 function Home() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const { isActive, isTrialing } = useSubscription();
   const [profile, setProfile] = useState<any>(null);
   const [todayWorkout, setTodayWorkout] = useState<any>(null);
   const [stats, setStats] = useState({ workouts: 0, streak: 0, weekDone: 0, weekTotal: 0 });
@@ -96,6 +98,22 @@ function Home() {
 
         {!checkin && (
           <CheckinCard onSaved={(c) => setCheckin(c)} />
+        )}
+
+        {!isActive && !isTrialing && (
+          <Link
+            to="/pricing"
+            className="mb-6 flex items-center gap-3 rounded-2xl border border-primary/40 bg-gradient-to-r from-primary/15 to-primary/5 p-4 hover:border-primary/70"
+          >
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-primary text-primary-foreground shadow-glow">
+              <Crown className="h-5 w-5" />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-semibold">Unlock unlimited coaching</div>
+              <div className="text-[11px] text-muted-foreground">7-day free trial · Cancel anytime</div>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </Link>
         )}
 
         {todayWorkout ? (

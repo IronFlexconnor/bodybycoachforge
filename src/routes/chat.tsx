@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Send, Sparkles, Video, Loader2, Crown } from "lucide-react";
+import { Send, Sparkles, Video, Loader2 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
@@ -9,6 +9,7 @@ import { extractFrames } from "@/lib/videoFrames";
 import { toast } from "sonner";
 import { PaywallModal } from "@/components/PaywallModal";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useUsage } from "@/hooks/useUsage";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({ meta: [{ title: "Coach Chat — Body Forge" }] }),
@@ -27,7 +28,9 @@ const suggestions = [
 function Chat() {
   const navigate = useNavigate();
   const { user, loading, session } = useAuth();
-  const { isPro, isElite } = useSubscription();
+  const { isPro } = useSubscription();
+  const chatUsage = useUsage("chat");
+  const videoUsage = useUsage("video");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -63,9 +66,19 @@ function Chat() {
         body: JSON.stringify({ message: text }),
       });
       if (!resp.ok || !resp.body) {
-        if (resp.status === 429) toast.error("Rate limit hit — try again in a moment.");
-        else if (resp.status === 402) toast.error("AI credits exhausted. Add funds in Settings → Workspace → Usage.");
-        else toast.error("Coach is unavailable. Try again.");
+        if (resp.status === 402) {
+          let payload: any = null;
+          try { payload = await resp.json(); } catch {}
+          if (payload?.code === "chat_daily_limit") {
+            setPaywall({ open: true, reason: payload.message, recommend: "pro" });
+          } else {
+            toast.error(payload?.message ?? "Coach unavailable. Try again.");
+          }
+        } else if (resp.status === 429) {
+          toast.error("Rate limit hit — try again in a moment.");
+        } else {
+          toast.error("Coach is unavailable. Try again.");
+        }
         setMessages((m) => m.slice(0, -1));
         return;
       }
@@ -125,8 +138,13 @@ function Chat() {
         body: { exercise: "workout", frames, storage_path: path },
       });
       toast.dismiss("analyze");
+      const d: any = data;
+      if (d?.error === "limit_reached" && d?.code === "video_monthly_limit") {
+        setPaywall({ open: true, reason: d.message, recommend: "elite" });
+        return;
+      }
       if (error) throw error;
-      const a = (data as any)?.analysis ?? {};
+      const a = d?.analysis ?? {};
       const summary = `📹 **Form check complete** — score **${a.score ?? "—"}/100**\n\n**Verdict:** ${a.summary ?? ""}\n\n**Top fixes:**\n${(a.fixes ?? []).map((f: string) => `- ${f}`).join("\n")}\n\n**Cues for next time:**\n${(a.cues ?? []).map((c: string) => `- ${c}`).join("\n")}`;
       // Persist as a system message so coach has it
       await supabase.from("chat_messages").insert({ user_id: user.id, role: "user", content: "[Uploaded a workout video for form check]" });
@@ -210,8 +228,22 @@ function Chat() {
               <Send className="h-4 w-4" />
             </button>
           </form>
+          {!isPro && (chatUsage.showWarning || videoUsage.showWarning) && (
+            <p className="mt-2 text-center text-[11px] text-muted-foreground">
+              {chatUsage.showWarning && `${chatUsage.remaining} coach message left today. `}
+              {videoUsage.showWarning && `${videoUsage.remaining} video form check left this month. `}
+              <button onClick={() => setPaywall({ open: true, reason: "Unlock unlimited coaching.", recommend: "pro" })}
+                className="font-semibold text-primary underline-offset-2 hover:underline">Upgrade</button>
+            </p>
+          )}
         </div>
       </div>
+      <PaywallModal
+        open={paywall.open}
+        onClose={() => setPaywall({ open: false })}
+        reason={paywall.reason}
+        recommend={paywall.recommend ?? "pro"}
+      />
     </AppShell>
   );
 }
