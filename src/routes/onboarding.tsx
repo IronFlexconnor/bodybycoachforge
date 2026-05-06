@@ -41,6 +41,7 @@ type Data = {
   diet?: string; injuries?: string; weight?: string;
   heightUnit?: HeightUnit;
   heightFeet?: number | null; heightInches?: number | null; heightCm?: number | null;
+  injurySelected?: string[]; injuryNotes?: string;
 };
 
 function Onboarding() {
