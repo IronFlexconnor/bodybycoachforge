@@ -23,6 +23,7 @@ function Home() {
   const [profile, setProfile] = useState<any>(null);
   const [todayWorkout, setTodayWorkout] = useState<any>(null);
   const [stats, setStats] = useState({ workouts: 0, streak: 0, weekDone: 0, weekTotal: 0 });
+  const [checkin, setCheckin] = useState<any>(null);
   const [busy, setBusy] = useState(true);
 
   useEffect(() => {
@@ -39,6 +40,10 @@ function Home() {
         .order("scheduled_date", { ascending: true }).limit(1).maybeSingle();
       setTodayWorkout(w);
 
+      const { data: c } = await supabase.from("daily_checkins").select("*")
+        .eq("user_id", user.id).eq("checkin_date", today).maybeSingle();
+      setCheckin(c);
+
       const startOfWeek = new Date();
       startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
       const { count: weekDone } = await supabase.from("workout_logs").select("*", { count: "exact", head: true })
@@ -54,6 +59,8 @@ function Home() {
       setBusy(false);
     })();
   }, [user, loading, navigate]);
+
+  const readiness = checkin ? Math.round(((checkin.energy ?? 5) * 7 + (10 - (checkin.soreness ?? 5)) * 6 + (10 - (checkin.stress ?? 5)) * 4 + Math.min(10, (checkin.sleep_hours ?? 7)) * 3) / 2) : null;
 
   if (loading || busy) {
     return (
