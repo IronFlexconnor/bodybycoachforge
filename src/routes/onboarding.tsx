@@ -43,6 +43,7 @@ type Data = {
   heightUnit?: HeightUnit;
   heightFeet?: number | null; heightInches?: number | null; heightCm?: number | null;
   injurySelected?: string[]; injuryNotes?: string;
+  agreedToDisclaimer?: boolean;
 };
 
 function Onboarding() {
@@ -79,6 +80,7 @@ function Onboarding() {
           injuries: p.injuries ?? "",
           injurySelected: parseInjuries(p.injuries).selected,
           injuryNotes: parseInjuries(p.injuries).notes,
+          agreedToDisclaimer: !!(p as any).agreed_to_disclaimer,
           weight: fromMetricWeight(p.weight, u),
           heightUnit: hu,
           heightFeet: ft.feet,
@@ -193,6 +195,43 @@ function Onboarding() {
         ) },
       { title: "Diet preference", subtitle: "Used for nutrition & meal suggestions.", valid: !!data.diet,
         body: <ChipsLarge options={diets} value={data.diet} onSelect={(v) => update("diet", v)} /> },
+      {
+        title: "Important Legal Agreement & Disclaimer",
+        subtitle: "Please read carefully before continuing.",
+        valid: !!data.agreedToDisclaimer,
+        body: (
+          <div className="space-y-4">
+            <div className="max-h-72 overflow-y-auto rounded-2xl border border-border bg-surface p-4 text-sm leading-relaxed text-muted-foreground">
+              <p className="mb-3">
+                ForgeCoach and its AI coach provide general fitness guidance only.
+              </p>
+              <p className="mb-3">
+                This app is <span className="font-semibold text-foreground">NOT</span> a licensed medical professional, doctor, physical therapist, nutritionist, or dietitian.
+              </p>
+              <p className="mb-3">
+                It does <span className="font-semibold text-foreground">NOT</span> provide medical advice, diagnose injuries, or guarantee any results.
+              </p>
+              <p className="mb-3">
+                You assume all risk for any injury, illness, or harm that may result from using the workouts, programs, or advice provided by the app.
+              </p>
+              <p>
+                By proceeding, you agree that ForgeCoach, its creators, and its AI coach are not liable for any injury, loss, or damage of any kind.
+              </p>
+            </div>
+            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border-2 border-border bg-gradient-card p-4 transition-all hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:shadow-glow">
+              <input
+                type="checkbox"
+                checked={!!data.agreedToDisclaimer}
+                onChange={(e) => update("agreedToDisclaimer", e.target.checked)}
+                className="mt-0.5 h-5 w-5 shrink-0 cursor-pointer accent-[oklch(0.78_0.17_165)]"
+              />
+              <span className="text-sm font-medium text-foreground">
+                I have read, understood, and fully agree to the disclaimer and liability waiver above. I release ForgeCoach from all liability and acknowledge this forms a binding agreement.
+              </span>
+            </label>
+          </div>
+        ),
+      },
     ], [data, units],
   );
 
@@ -222,6 +261,8 @@ function Onboarding() {
           (data.heightUnit ?? "imperial") === "imperial"
             ? (data.heightFeet != null && data.heightInches != null ? ftInToCm(data.heightFeet, data.heightInches) : null)
             : (data.heightCm ?? null),
+        agreed_to_disclaimer: true,
+        agreed_to_disclaimer_at: new Date().toISOString(),
         onboarded: true,
       }).eq("user_id", user.id);
       if (error) throw error;

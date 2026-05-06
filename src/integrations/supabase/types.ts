@@ -188,6 +188,8 @@ export type Database = {
       profiles: {
         Row: {
           age: number | null
+          agreed_to_disclaimer: boolean
+          agreed_to_disclaimer_at: string | null
           created_at: string
           days_per_week: number | null
           diet: string | null
@@ -211,6 +213,8 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          agreed_to_disclaimer?: boolean
+          agreed_to_disclaimer_at?: string | null
           created_at?: string
           days_per_week?: number | null
           diet?: string | null
@@ -234,6 +238,8 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          agreed_to_disclaimer?: boolean
+          agreed_to_disclaimer_at?: string | null
           created_at?: string
           days_per_week?: number | null
           diet?: string | null
