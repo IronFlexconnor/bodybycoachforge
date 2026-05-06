@@ -37,7 +37,10 @@ function Welcome() {
 
         <div className="space-y-3">
           <Button asChild size="lg" className="h-14 w-full rounded-2xl bg-gradient-primary text-base font-semibold text-primary-foreground shadow-glow">
-            <Link to="/onboarding">Start free — 2 minute setup</Link>
+            <Link to="/auth">Get started — 2 minute setup</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="h-12 w-full rounded-2xl border-border bg-surface">
+            <Link to="/auth">I already have an account</Link>
           </Button>
           <p className="text-center text-xs text-muted-foreground">
             Not medical advice. Always consult your doctor before starting a new program.

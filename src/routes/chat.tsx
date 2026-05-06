@@ -1,57 +1,145 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState, useRef, useEffect } from "react";
-import { Send, Sparkles, Video, Image as ImageIcon } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
+import { Send, Sparkles, Video, Loader2 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
+import { extractFrames } from "@/lib/videoFrames";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({ meta: [{ title: "Coach Chat — Body Forge" }] }),
   component: Chat,
 });
 
-type Msg = { role: "user" | "coach"; text: string };
-
-const seed: Msg[] = [
-  { role: "coach", text: "Hey — ready for today's push session? Quick check: how did your shoulders feel after Tuesday's pull day?" },
-  { role: "user", text: "Pretty good actually, no soreness." },
-  { role: "coach", text: "Love that. We'll push the bench a little — try 82.5kg for your top set. Send me a video of set 2 and I'll review your bar path. 💪" },
-];
+type Msg = { id?: string; role: "user" | "assistant"; content: string };
 
 const suggestions = [
   "Modify today's workout",
-  "Form check my squat",
   "What should I eat post-workout?",
   "I'm feeling tired — should I train?",
+  "Give me a 15-min mobility flow",
 ];
 
 function Chat() {
-  const [messages, setMessages] = useState<Msg[]>(seed);
+  const navigate = useNavigate();
+  const { user, loading, session } = useAuth();
+  const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
+  const [streaming, setStreaming] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (!loading && !user) navigate({ to: "/auth" });
+  }, [user, loading, navigate]);
 
-  const send = (text: string) => {
-    if (!text.trim()) return;
-    setMessages((m) => [...m, { role: "user", text }]);
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("chat_messages").select("id, role, content").eq("user_id", user.id).order("created_at").then(({ data }) => {
+      setMessages((data ?? []) as Msg[]);
+    });
+  }, [user]);
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  const send = async (text: string) => {
+    if (!text.trim() || streaming || !session) return;
     setInput("");
-    setTimeout(() => {
-      setMessages((m) => [
-        ...m,
-        {
-          role: "coach",
-          text: "Great question — once your AI Coach is connected, I'll give you a fully personalized response based on your full history, current program, and recovery data.",
-        },
-      ]);
-    }, 700);
+    setMessages((m) => [...m, { role: "user", content: text }, { role: "assistant", content: "" }]);
+    setStreaming(true);
+
+    try {
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-coach`;
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ message: text }),
+      });
+      if (!resp.ok || !resp.body) {
+        if (resp.status === 429) toast.error("Rate limit hit — try again in a moment.");
+        else if (resp.status === 402) toast.error("AI credits exhausted. Add funds in Settings → Workspace → Usage.");
+        else toast.error("Coach is unavailable. Try again.");
+        setMessages((m) => m.slice(0, -1));
+        return;
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = "";
+      let acc = "";
+      let done = false;
+      while (!done) {
+        const { done: d, value } = await reader.read();
+        if (d) break;
+        buf += decoder.decode(value, { stream: true });
+        let nl: number;
+        while ((nl = buf.indexOf("\n")) !== -1) {
+          let line = buf.slice(0, nl);
+          buf = buf.slice(nl + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || !line.startsWith("data: ")) continue;
+          const json = line.slice(6).trim();
+          if (json === "[DONE]") { done = true; break; }
+          try {
+            const parsed = JSON.parse(json);
+            const c = parsed.choices?.[0]?.delta?.content;
+            if (c) {
+              acc += c;
+              setMessages((m) => {
+                const copy = [...m];
+                copy[copy.length - 1] = { role: "assistant", content: acc };
+                return copy;
+              });
+            }
+          } catch { buf = line + "\n" + buf; break; }
+        }
+      }
+    } catch (e) {
+      toast.error("Network error");
+    } finally {
+      setStreaming(false);
+    }
+  };
+
+  const onVideo = async (file: File) => {
+    if (!user || !session) return;
+    setAnalyzing(true);
+    try {
+      // Upload to storage
+      const path = `${user.id}/${Date.now()}-${file.name}`;
+      const { error: upErr } = await supabase.storage.from("workout-videos").upload(path, file, { contentType: file.type });
+      if (upErr) throw upErr;
+
+      // Extract frames in browser
+      toast.loading("Analyzing your form…", { id: "analyze" });
+      const frames = await extractFrames(file, 8);
+
+      const { data, error } = await supabase.functions.invoke("analyze-video", {
+        body: { exercise: "workout", frames, storage_path: path },
+      });
+      toast.dismiss("analyze");
+      if (error) throw error;
+      const a = (data as any)?.analysis ?? {};
+      const summary = `📹 **Form check complete** — score **${a.score ?? "—"}/100**\n\n**Verdict:** ${a.summary ?? ""}\n\n**Top fixes:**\n${(a.fixes ?? []).map((f: string) => `- ${f}`).join("\n")}\n\n**Cues for next time:**\n${(a.cues ?? []).map((c: string) => `- ${c}`).join("\n")}`;
+      // Persist as a system message so coach has it
+      await supabase.from("chat_messages").insert({ user_id: user.id, role: "user", content: "[Uploaded a workout video for form check]" });
+      await supabase.from("chat_messages").insert({ user_id: user.id, role: "assistant", content: summary });
+      setMessages((m) => [...m, { role: "user", content: "📹 Uploaded a video for form check" }, { role: "assistant", content: summary }]);
+      toast.success("Form analysis ready");
+    } catch (e) {
+      toast.dismiss("analyze");
+      toast.error(e instanceof Error ? e.message : "Video analysis failed");
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   return (
     <AppShell>
       <div className="flex min-h-dvh flex-col">
-        {/* Header */}
         <div className="sticky top-0 z-10 border-b border-border/60 bg-background/80 px-5 py-4 backdrop-blur-xl">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -62,71 +150,53 @@ function Chat() {
             </div>
             <div>
               <div className="font-semibold leading-tight">Coach Forge</div>
-              <div className="text-xs text-muted-foreground">Online · Replies instantly</div>
+              <div className="text-xs text-muted-foreground">Online · Personalized to you</div>
             </div>
           </div>
         </div>
 
-        {/* Messages */}
         <div className="flex-1 space-y-4 px-5 py-6">
+          {messages.length === 0 && (
+            <div className="rounded-2xl border border-border/60 bg-gradient-card p-4 text-sm text-muted-foreground">
+              Ask anything — programming, nutrition, recovery, mindset. Upload a video and I'll grade your form.
+            </div>
+          )}
           {messages.map((m, i) => (
             <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
-              <div
-                className={cn(
-                  "max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
-                  m.role === "user"
-                    ? "rounded-br-md bg-gradient-primary text-primary-foreground shadow-glow"
-                    : "rounded-bl-md border border-border/60 bg-gradient-card shadow-card"
-                )}
-              >
-                {m.text}
+              <div className={cn("max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed",
+                m.role === "user"
+                  ? "rounded-br-md bg-gradient-primary text-primary-foreground shadow-glow"
+                  : "rounded-bl-md border border-border/60 bg-gradient-card shadow-card")}>
+                {m.content || (streaming && i === messages.length - 1 ? <Loader2 className="h-4 w-4 animate-spin" /> : "")}
               </div>
             </div>
           ))}
           <div ref={endRef} />
         </div>
 
-        {/* Suggestions */}
-        {messages.length <= 3 && (
+        {messages.length <= 1 && !streaming && (
           <div className="mb-2 -mx-1 flex gap-2 overflow-x-auto px-5 pb-2">
             {suggestions.map((s) => (
-              <button
-                key={s}
-                onClick={() => send(s)}
-                className="shrink-0 rounded-full border border-border bg-surface px-3.5 py-2 text-xs font-medium text-muted-foreground hover:border-primary/40 hover:text-primary"
-              >
+              <button key={s} onClick={() => send(s)}
+                className="shrink-0 rounded-full border border-border bg-surface px-3.5 py-2 text-xs font-medium text-muted-foreground hover:border-primary/40 hover:text-primary">
                 {s}
               </button>
             ))}
           </div>
         )}
 
-        {/* Input */}
         <div className="sticky bottom-0 border-t border-border/60 bg-background/90 px-4 py-3 backdrop-blur-xl">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              send(input);
-            }}
-            className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-2 py-1.5"
-          >
-            <button type="button" className="grid h-9 w-9 place-items-center rounded-xl text-muted-foreground hover:text-primary">
-              <Video className="h-4 w-4" />
+          <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-2 py-1.5">
+            <input ref={fileRef} type="file" accept="video/*" hidden
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) onVideo(f); e.target.value = ""; }} />
+            <button type="button" onClick={() => fileRef.current?.click()} disabled={analyzing}
+              className="grid h-9 w-9 place-items-center rounded-xl text-muted-foreground hover:text-primary disabled:opacity-50" aria-label="Upload video">
+              {analyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
             </button>
-            <button type="button" className="grid h-9 w-9 place-items-center rounded-xl text-muted-foreground hover:text-primary">
-              <ImageIcon className="h-4 w-4" />
-            </button>
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask your coach anything..."
-              className="flex-1 bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim()}
-              className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary text-primary-foreground shadow-glow disabled:opacity-40"
-            >
+            <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask your coach anything..."
+              className="flex-1 bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground" disabled={streaming} />
+            <button type="submit" disabled={!input.trim() || streaming}
+              className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary text-primary-foreground shadow-glow disabled:opacity-40">
               <Send className="h-4 w-4" />
             </button>
           </form>

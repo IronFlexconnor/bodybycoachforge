@@ -1,12 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import {
-  Flame, Play, MessageCircle, TrendingUp, Activity, Heart, Zap, ChevronRight, CheckCircle2,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Flame, Play, MessageCircle, TrendingUp, Activity, Heart, Zap, ChevronRight, Loader2 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { isOnboarded, loadOnboarding } from "@/lib/onboarding";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -20,17 +18,58 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const navigate = useNavigate();
-  useEffect(() => {
-    if (!isOnboarded()) navigate({ to: "/welcome" });
-  }, [navigate]);
+  const { user, loading } = useAuth();
+  const [profile, setProfile] = useState<any>(null);
+  const [todayWorkout, setTodayWorkout] = useState<any>(null);
+  const [stats, setStats] = useState({ workouts: 0, streak: 0, weekDone: 0, weekTotal: 0 });
+  const [busy, setBusy] = useState(true);
 
-  const profile = loadOnboarding();
-  const name = profile.name || "Athlete";
+  useEffect(() => {
+    if (loading) return;
+    if (!user) { navigate({ to: "/welcome" }); return; }
+    (async () => {
+      const { data: p } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle();
+      if (!p?.onboarded) { navigate({ to: "/onboarding" }); return; }
+      setProfile(p);
+
+      const today = new Date().toISOString().slice(0, 10);
+      const { data: w } = await supabase.from("workouts").select("*")
+        .eq("user_id", user.id).gte("scheduled_date", today)
+        .order("scheduled_date", { ascending: true }).limit(1).maybeSingle();
+      setTodayWorkout(w);
+
+      const startOfWeek = new Date();
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+      const { count: weekDone } = await supabase.from("workout_logs").select("*", { count: "exact", head: true })
+        .eq("user_id", user.id).gte("started_at", startOfWeek.toISOString());
+      const { count: total } = await supabase.from("workout_logs").select("*", { count: "exact", head: true }).eq("user_id", user.id);
+
+      setStats({
+        workouts: total ?? 0,
+        streak: total ?? 0,
+        weekDone: weekDone ?? 0,
+        weekTotal: p.days_per_week ?? 4,
+      });
+      setBusy(false);
+    })();
+  }, [user, loading, navigate]);
+
+  if (loading || busy) {
+    return (
+      <AppShell>
+        <div className="grid min-h-dvh place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+      </AppShell>
+    );
+  }
+
+  const name = profile?.name || "Athlete";
+  const exCount = Array.isArray(todayWorkout?.exercises) ? todayWorkout.exercises.length : 0;
+  const setCount = Array.isArray(todayWorkout?.exercises)
+    ? todayWorkout.exercises.reduce((a: number, e: any) => a + (Number(e.sets) || 0), 0) : 0;
 
   return (
     <AppShell>
       <div className="px-5 pt-12">
-        {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">Good to see you,</p>
@@ -41,44 +80,33 @@ function Home() {
           </Link>
         </div>
 
-        {/* Readiness */}
         <div className="mb-5 flex gap-3">
-          <Stat icon={Heart} value="86" label="Readiness" tone="primary" />
-          <Stat icon={Flame} value="12" label="Day streak" tone="warning" />
-          <Stat icon={Activity} value="4/5" label="This week" tone="default" />
+          <Stat icon={Heart} value="86" label="Readiness" />
+          <Stat icon={Flame} value={`${stats.workouts}`} label="Total sessions" />
+          <Stat icon={Activity} value={`${stats.weekDone}/${stats.weekTotal}`} label="This week" />
         </div>
 
-        {/* Today's workout — hero card */}
-        <Link
-          to="/workouts"
-          className="group relative mb-6 block overflow-hidden rounded-3xl border border-primary/20 bg-gradient-card p-6 shadow-card"
-        >
-          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
-          <div className="relative">
-            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
-              <Zap className="h-3 w-3" /> Today's Session
+        {todayWorkout ? (
+          <Link to="/workouts" className="group relative mb-6 block overflow-hidden rounded-3xl border border-primary/20 bg-gradient-card p-6 shadow-card">
+            <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
+            <div className="relative">
+              <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+                <Zap className="h-3 w-3" /> Next Session
+              </div>
+              <h2 className="mb-1 text-2xl font-bold">{todayWorkout.title}</h2>
+              <p className="mb-5 text-sm text-muted-foreground">{exCount} exercises · {setCount} sets · {todayWorkout.focus ?? ""}</p>
+              <Button className="h-12 w-full rounded-xl bg-gradient-primary text-sm font-semibold text-primary-foreground shadow-glow">
+                <Play className="mr-2 h-4 w-4 fill-current" /> Start workout
+              </Button>
             </div>
-            <h2 className="mb-1 text-2xl font-bold">Upper Body — Push Focus</h2>
-            <p className="mb-5 text-sm text-muted-foreground">6 exercises · ~{profile.sessionLength ?? 45} min · Hypertrophy block</p>
-
-            <div className="mb-5 grid grid-cols-3 gap-2 text-center">
-              <MiniStat label="Volume" value="12.4k" />
-              <MiniStat label="Sets" value="22" />
-              <MiniStat label="Intensity" value="RPE 7" />
-            </div>
-
-            <Button className="h-12 w-full rounded-xl bg-gradient-primary text-sm font-semibold text-primary-foreground shadow-glow group-hover:opacity-95">
-              <Play className="mr-2 h-4 w-4 fill-current" />
-              Start workout
-            </Button>
+          </Link>
+        ) : (
+          <div className="mb-6 rounded-3xl border border-border/60 bg-gradient-card p-6 text-center shadow-card">
+            <p className="text-sm text-muted-foreground">No upcoming sessions. Open Coach to plan your next block.</p>
           </div>
-        </Link>
+        )}
 
-        {/* AI Coach widget */}
-        <Link
-          to="/chat"
-          className="mb-6 flex items-center gap-4 rounded-2xl border border-border/60 bg-gradient-card p-4 shadow-card transition-all hover:border-primary/40"
-        >
+        <Link to="/chat" className="mb-6 flex items-center gap-4 rounded-2xl border border-border/60 bg-gradient-card p-4 shadow-card hover:border-primary/40">
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-primary text-primary-foreground shadow-glow">
             <MessageCircle className="h-5 w-5" />
           </div>
@@ -87,92 +115,39 @@ function Home() {
               <span className="font-semibold">Coach Forge</span>
               <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
             </div>
-            <p className="truncate text-sm text-muted-foreground">
-              Ready when you are — ask me anything about today's plan.
-            </p>
+            <p className="truncate text-sm text-muted-foreground">Ready when you are — ask me anything.</p>
           </div>
           <ChevronRight className="h-5 w-5 text-muted-foreground" />
         </Link>
 
-        {/* Progress snapshot */}
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">This week</h3>
-          <Link to="/progress" className="text-sm font-medium text-primary">See all</Link>
+          <h3 className="text-lg font-semibold">Quick view</h3>
+          <Link to="/progress" className="text-sm font-medium text-primary">See progress</Link>
         </div>
-
-        <div className="mb-6 grid grid-cols-2 gap-3">
-          <ProgressCard icon={TrendingUp} title="Bench Press" value="+5kg" sub="vs last 4 weeks" />
-          <ProgressCard icon={Activity} title="Avg RPE" value="7.2" sub="On target" />
-        </div>
-
-        {/* Habits */}
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Daily habits</h3>
-          <span className="text-sm text-muted-foreground">3 / 4</span>
-        </div>
-        <div className="space-y-2">
-          {[
-            { label: "Hit protein target (160g)", done: true },
-            { label: "8 glasses of water", done: true },
-            { label: "Mobility (10 min)", done: true },
-            { label: "Sleep 7+ hours", done: false },
-          ].map((h) => (
-            <div
-              key={h.label}
-              className={cn(
-                "flex items-center gap-3 rounded-xl border bg-gradient-card px-4 py-3 transition-colors",
-                h.done ? "border-primary/30" : "border-border/60"
-              )}
-            >
-              <CheckCircle2
-                className={cn("h-5 w-5", h.done ? "text-primary fill-primary/20" : "text-muted-foreground")}
-              />
-              <span className={cn("text-sm font-medium", h.done && "line-through text-muted-foreground")}>
-                {h.label}
-              </span>
-            </div>
-          ))}
+        <div className="grid grid-cols-2 gap-3">
+          <Card icon={TrendingUp} title="Adherence" value={`${Math.round(((stats.weekDone) / Math.max(1, stats.weekTotal)) * 100)}%`} sub="This week" />
+          <Card icon={Activity} title="Program" value={profile?.goal ?? "—"} sub="Active goal" />
         </div>
       </div>
     </AppShell>
   );
 }
 
-function Stat({
-  icon: Icon, value, label, tone,
-}: { icon: typeof Heart; value: string; label: string; tone: "primary" | "warning" | "default" }) {
+function Stat({ icon: Icon, value, label }: { icon: typeof Heart; value: string; label: string }) {
   return (
     <div className="flex-1 rounded-2xl border border-border/60 bg-gradient-card p-3 shadow-card">
-      <Icon
-        className={cn(
-          "mb-1.5 h-4 w-4",
-          tone === "primary" && "text-primary",
-          tone === "warning" && "text-[oklch(0.82_0.16_75)]",
-          tone === "default" && "text-muted-foreground"
-        )}
-      />
+      <Icon className="mb-1.5 h-4 w-4 text-primary" />
       <div className="text-lg font-bold tabular-nums leading-none">{value}</div>
       <div className="mt-1 text-[11px] text-muted-foreground">{label}</div>
     </div>
   );
 }
 
-function MiniStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl bg-background/40 py-2.5">
-      <div className="text-base font-bold tabular-nums">{value}</div>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
-    </div>
-  );
-}
-
-function ProgressCard({ icon: Icon, title, value, sub }: { icon: typeof TrendingUp; title: string; value: string; sub: string }) {
+function Card({ icon: Icon, title, value, sub }: { icon: typeof TrendingUp; title: string; value: string; sub: string }) {
   return (
     <div className="rounded-2xl border border-border/60 bg-gradient-card p-4 shadow-card">
-      <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
-        <Icon className="h-3.5 w-3.5" /> {title}
-      </div>
-      <div className="text-2xl font-bold text-gradient-primary">{value}</div>
+      <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground"><Icon className="h-3.5 w-3.5" /> {title}</div>
+      <div className="text-xl font-bold text-gradient-primary">{value}</div>
       <div className="mt-1 text-xs text-muted-foreground">{sub}</div>
     </div>
   );
