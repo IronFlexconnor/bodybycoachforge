@@ -129,6 +129,7 @@ function ActiveSession({ workout, onClose, onComplete }: { workout: Workout; onC
         user_id: user.id, workout_log_id: logId, exercise_name: ex, set_number: idx + 1,
         reps: set.reps ? parseInt(set.reps) : null,
         weight: set.weight ? parseFloat(set.weight) : null,
+        weight_unit: weightUnit,
         rpe: set.rpe ? parseFloat(set.rpe) : null,
         completed: true,
       });
