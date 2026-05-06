@@ -86,7 +86,7 @@ function AuthPage() {
           </div>
           <div className="relative">
             <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required minLength={6} placeholder="Password (min 8 recommended)" className="h-13 pl-10" />
+            <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required minLength={mode === "signup" ? 8 : 6} placeholder={mode === "signup" ? "Password (min 8)" : "Password"} className="h-13 pl-10" />
           </div>
           {mode === "signup" && <PasswordStrengthMeter password={password} />}
           <Button type="submit" disabled={busy} className="h-13 w-full rounded-xl bg-gradient-primary font-semibold text-primary-foreground shadow-glow">
