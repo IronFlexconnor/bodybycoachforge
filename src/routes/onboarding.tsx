@@ -39,7 +39,8 @@ type Data = {
   name?: string; age?: string; gender?: string; level?: string; goal?: string;
   daysPerWeek?: number; sessionLength?: number; equipment?: string[];
   diet?: string; injuries?: string; weight?: string;
-  heightFeet?: number | null; heightInches?: number | null;
+  heightUnit?: HeightUnit;
+  heightFeet?: number | null; heightInches?: number | null; heightCm?: number | null;
 };
 
 function Onboarding() {
@@ -47,7 +48,7 @@ function Onboarding() {
   const { user, loading } = useAuth();
   const [step, setStep] = useState(0);
   const [building, setBuilding] = useState(false);
-  const [data, setData] = useState<Data>({ daysPerWeek: 4, sessionLength: 45, equipment: [] });
+  const [data, setData] = useState<Data>({ daysPerWeek: 4, sessionLength: 45, equipment: [], heightUnit: "imperial" });
   const [units, setUnits] = useState<Units>(DEFAULT_UNITS);
 
   useEffect(() => {
