@@ -24,6 +24,8 @@ function Progress() {
     if (!user) { navigate({ to: "/auth" }); return; }
     (async () => {
       const since = new Date(Date.now() - 56 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: prof } = await supabase.from("profiles").select("units").eq("user_id", user.id).maybeSingle();
+      if (prof?.units === "metric" || prof?.units === "imperial") setUnits(prof.units);
       const { data: logs, count } = await supabase.from("workout_logs").select("*", { count: "exact" })
         .eq("user_id", user.id).gte("started_at", since);
       const { data: sets } = await supabase.from("set_logs").select("exercise_name, weight, reps, created_at")
