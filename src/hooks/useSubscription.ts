@@ -61,8 +61,11 @@ export function useSubscription() {
 
   useEffect(() => {
     if (!user) return;
+    // Unique channel name per mount avoids Supabase's "cannot add callbacks
+    // after subscribe()" error in React StrictMode (double-invoke) and HMR.
+    const channelName = `subs-${user.id}-${Math.random().toString(36).slice(2, 10)}`;
     const channel = supabase
-      .channel(`subs-${user.id}`)
+      .channel(channelName)
       .on("postgres_changes", { event: "*", schema: "public", table: "subscriptions", filter: `user_id=eq.${user.id}` }, () => {
         refetch();
       })
