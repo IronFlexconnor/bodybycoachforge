@@ -8,6 +8,17 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { UnitToggle } from "@/components/UnitToggle";
+import {
+  DEFAULT_UNITS,
+  type Units,
+  fromMetricHeight,
+  fromMetricWeight,
+  heightLabel,
+  weightLabel,
+  toMetricHeight,
+  toMetricWeight,
+} from "@/lib/units";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
@@ -37,6 +48,7 @@ function Onboarding() {
   const [step, setStep] = useState(0);
   const [building, setBuilding] = useState(false);
   const [data, setData] = useState<Data>({ daysPerWeek: 4, sessionLength: 45, equipment: [] });
+  const [units, setUnits] = useState<Units>(DEFAULT_UNITS);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth" });
@@ -47,6 +59,8 @@ function Onboarding() {
     if (!user) return;
     supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle().then(({ data: p }) => {
       if (p) {
+        const u: Units = (p.units === "metric" ? "metric" : "imperial");
+        setUnits(u);
         setData({
           name: p.name ?? "",
           age: p.age?.toString() ?? "",
@@ -58,13 +72,28 @@ function Onboarding() {
           equipment: p.equipment ?? [],
           diet: p.diet ?? undefined,
           injuries: p.injuries ?? "",
-          weight: p.weight?.toString() ?? "",
-          height: p.height?.toString() ?? "",
+          weight: fromMetricWeight(p.weight, u),
+          height: fromMetricHeight(p.height, u),
         });
         if (p.onboarded) navigate({ to: "/" });
       }
     });
   }, [user, navigate]);
+
+  const switchUnits = (next: Units) => {
+    if (next === units) return;
+    // Convert current entered values between units so user's input is preserved.
+    setData((d) => {
+      const wKg = toMetricWeight(d.weight ?? "", units);
+      const hCm = toMetricHeight(d.height ?? "", units);
+      return {
+        ...d,
+        weight: wKg != null ? fromMetricWeight(wKg, next) : d.weight,
+        height: hCm != null ? fromMetricHeight(hCm, next) : d.height,
+      };
+    });
+    setUnits(next);
+  };
 
   const update = <K extends keyof Data>(k: K, v: Data[K]) => setData((d) => ({ ...d, [k]: v }));
 
@@ -83,9 +112,10 @@ function Onboarding() {
           <div className="space-y-4">
             <Input type="number" placeholder="Age" value={data.age ?? ""} onChange={(e) => update("age", e.target.value)} className="h-14 text-lg" />
             <Chips options={genders} value={data.gender} onSelect={(v) => update("gender", v)} />
+            <UnitToggle value={units} onChange={switchUnits} />
             <div className="grid grid-cols-2 gap-3">
-              <Input placeholder="Weight (kg)" value={data.weight ?? ""} onChange={(e) => update("weight", e.target.value)} className="h-14" />
-              <Input placeholder="Height (cm)" value={data.height ?? ""} onChange={(e) => update("height", e.target.value)} className="h-14" />
+              <Input inputMode="decimal" placeholder={`Weight (${weightLabel(units)})`} value={data.weight ?? ""} onChange={(e) => update("weight", e.target.value)} className="h-14" />
+              <Input inputMode="decimal" placeholder={`Height (${heightLabel(units)})`} value={data.height ?? ""} onChange={(e) => update("height", e.target.value)} className="h-14" />
             </div>
           </div>
         ) },
@@ -119,7 +149,7 @@ function Onboarding() {
         body: <ChipsLarge options={diets} value={data.diet} onSelect={(v) => update("diet", v)} /> },
       { title: "Any injuries or limitations?", subtitle: "Optional — but it helps us keep you safe.", valid: true,
         body: <Textarea placeholder="e.g. Lower back tightness, left knee surgery 2022..." value={data.injuries ?? ""} onChange={(e) => update("injuries", e.target.value)} rows={5} className="text-base" /> },
-    ], [data],
+    ], [data, units],
   );
 
   const current = steps[step];
@@ -141,8 +171,10 @@ function Onboarding() {
         equipment: data.equipment ?? [],
         diet: data.diet,
         injuries: data.injuries,
-        weight: data.weight ? parseFloat(data.weight) : null,
-        height: data.height ? parseFloat(data.height) : null,
+        units,
+        weight: toMetricWeight(data.weight ?? "", units),
+        height: toMetricHeight(data.height ?? "", units),
+        onboarded: true,
       }).eq("user_id", user.id);
       if (error) throw error;
 

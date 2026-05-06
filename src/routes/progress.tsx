@@ -4,6 +4,10 @@ import { TrendingUp, Award, Flame, Activity, Sparkles, Loader2 } from "lucide-re
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { DEFAULT_UNITS, type Units, kgToLb, weightLabel } from "@/lib/units";
+
+const displayVolume = (kg: number, u: Units) => (u === "imperial" ? kgToLb(kg) : kg);
+const displayLift = (kg: number, u: Units) => Math.round(u === "imperial" ? kgToLb(kg) : kg);
 
 export const Route = createFileRoute("/progress")({
   head: () => ({ meta: [{ title: "Progress — Body Forge" }] }),
@@ -16,12 +20,15 @@ function Progress() {
   const [stats, setStats] = useState({ workouts: 0, prs: 0, volume: 0, sessions: 0 });
   const [lifts, setLifts] = useState<{ name: string; current: number; trend: number[] }[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [units, setUnits] = useState<Units>(DEFAULT_UNITS);
 
   useEffect(() => {
     if (loading) return;
     if (!user) { navigate({ to: "/auth" }); return; }
     (async () => {
       const since = new Date(Date.now() - 56 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: prof } = await supabase.from("profiles").select("units").eq("user_id", user.id).maybeSingle();
+      if (prof?.units === "metric" || prof?.units === "imperial") setUnits(prof.units);
       const { data: logs, count } = await supabase.from("workout_logs").select("*", { count: "exact" })
         .eq("user_id", user.id).gte("started_at", since);
       const { data: sets } = await supabase.from("set_logs").select("exercise_name, weight, reps, created_at")
@@ -59,7 +66,7 @@ function Progress() {
         <div className="mb-6 grid grid-cols-2 gap-3">
           <BigStat icon={Flame} value={`${stats.workouts}`} label="Workouts" sub="Logged sessions" />
           <BigStat icon={Award} value={`${stats.prs}`} label="Tracked lifts" sub="In rotation" />
-          <BigStat icon={Activity} value={`${(stats.volume / 1000).toFixed(1)}k`} label="Total volume" sub="kg lifted" />
+          <BigStat icon={Activity} value={`${(displayVolume(stats.volume, units) / 1000).toFixed(1)}k`} label="Total volume" sub={`${weightLabel(units)} lifted`} />
           <BigStat icon={TrendingUp} value={`${stats.sessions}`} label="Completed" sub="On schedule" />
         </div>
 
@@ -74,7 +81,7 @@ function Progress() {
           <p className="text-sm leading-relaxed text-foreground/90">
             {stats.workouts === 0
               ? "Log your first session to unlock personalized weekly reviews."
-              : `You've logged ${stats.workouts} sessions and moved ${(stats.volume / 1000).toFixed(1)}k kg of total volume. Open the chat for a full breakdown and recommendations.`}
+              : `You've logged ${stats.workouts} sessions and moved ${(displayVolume(stats.volume, units) / 1000).toFixed(1)}k ${weightLabel(units)} of total volume. Open the chat for a full breakdown and recommendations.`}
           </p>
         </div>
 
@@ -85,7 +92,7 @@ function Progress() {
               <div className="mb-3 flex items-baseline justify-between">
                 <div>
                   <div className="font-semibold">{lift.name}</div>
-                  <div className="text-2xl font-bold tabular-nums">{lift.current}kg</div>
+                  <div className="text-2xl font-bold tabular-nums">{displayLift(lift.current, units)}{weightLabel(units)}</div>
                 </div>
                 <div className="rounded-full bg-primary/15 px-2.5 py-1 text-xs font-semibold text-primary">{lift.trend.length} sets</div>
               </div>

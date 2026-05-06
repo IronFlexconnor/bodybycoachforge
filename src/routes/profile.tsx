@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { useSubscription } from "@/hooks/useSubscription";
 import { createPortalSession } from "@/utils/payments.functions";
 import { getStripeEnvironment, PLAN_BY_PRICE } from "@/lib/stripe";
+import { UnitToggle } from "@/components/UnitToggle";
+import { DEFAULT_UNITS, type Units, displayHeight, displayWeight } from "@/lib/units";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — Body Forge" }] }),
@@ -23,6 +25,14 @@ function Profile() {
   const [regen, setRegen] = useState(false);
   const [portalBusy, setPortalBusy] = useState(false);
   const { sub, isActive, tier, isTrialing } = useSubscription();
+  const [units, setUnits] = useState<Units>(DEFAULT_UNITS);
+
+  const updateUnits = async (next: Units) => {
+    setUnits(next);
+    if (!user) return;
+    const { error } = await supabase.from("profiles").update({ units: next }).eq("user_id", user.id);
+    if (error) toast.error("Could not save unit preference");
+  };
 
   const openPortal = async () => {
     setPortalBusy(true);
@@ -41,7 +51,10 @@ function Profile() {
   useEffect(() => {
     if (loading) return;
     if (!user) { navigate({ to: "/welcome" }); return; }
-    supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle().then(({ data }) => setP(data));
+    supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle().then(({ data }) => {
+      setP(data);
+      if (data?.units === "metric" || data?.units === "imperial") setUnits(data.units);
+    });
     supabase.from("programs").select("*").eq("user_id", user.id).eq("is_active", true).order("created_at", { ascending: false }).limit(1).maybeSingle().then(({ data }) => setProgram(data));
   }, [user, loading, navigate]);
 
@@ -83,9 +96,14 @@ function Profile() {
           </div>
           <div className="mt-5 grid grid-cols-3 divide-x divide-border/60 rounded-2xl bg-background/40 py-3 text-center">
             <Mini label="Age" value={p.age ?? "—"} />
-            <Mini label="Weight" value={p.weight ? `${p.weight}kg` : "—"} />
-            <Mini label="Height" value={p.height ? `${p.height}cm` : "—"} />
+            <Mini label="Weight" value={displayWeight(p.weight, units)} />
+            <Mini label="Height" value={displayHeight(p.height, units)} />
           </div>
+        </div>
+
+        <div className="mb-6">
+          <h3 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Units</h3>
+          <UnitToggle value={units} onChange={updateUnits} />
         </div>
 
         <Section title="Training">
