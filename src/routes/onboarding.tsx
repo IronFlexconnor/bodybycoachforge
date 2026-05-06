@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MeasurementSystemPicker } from "@/components/MeasurementSystemPicker";
 import { HeightPicker, cmToFtIn, ftInToCm, type HeightUnit } from "@/components/HeightPicker";
+import { InjuryAssessment, parseInjuries, serializeInjuries } from "@/components/InjuryAssessment";
 import {
   DEFAULT_UNITS,
   type Units,
