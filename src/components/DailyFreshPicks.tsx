@@ -47,6 +47,7 @@ function seededShuffle<T>(arr: T[], seed: number): T[] {
 export function DailyFreshPicks() {
   const navigate = useNavigate();
   const [items, setItems] = useState<Recipe[] | null>(null);
+  const { isFav, toggle } = useFavorites();
 
   useEffect(() => {
     let cancelled = false;
