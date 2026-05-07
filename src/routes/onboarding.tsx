@@ -172,8 +172,8 @@ function Onboarding() {
         ) },
       { title: "Your experience level", subtitle: "Be honest — your coach adapts every week.", valid: !!data.level,
         body: <ChipsLarge options={levels} value={data.level} onSelect={(v) => update("level", v)} /> },
-      { title: "What's your #1 goal?", subtitle: "We'll architect your program around this.", valid: !!data.goal,
-        body: <ChipsLarge options={goals} value={data.goal} onSelect={(v) => update("goal", v)} /> },
+      { title: "What's your #1 goal?", subtitle: "Pick a goal — Coach designs the whole program around it.", valid: !!data.goal,
+        body: <GoalGrid value={data.goal} onSelect={(v) => update("goal", v)} /> },
       { title: "Your schedule", subtitle: "Quality over quantity — every session counts.", valid: true,
         body: (
           <div className="space-y-6">
