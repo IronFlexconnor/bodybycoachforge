@@ -276,6 +276,7 @@ function Onboarding() {
             ? (data.heightFeet != null && data.heightInches != null ? ftInToCm(data.heightFeet, data.heightInches) : null)
             : (data.heightCm ?? null),
         agreed_to_disclaimer: true,
+        nutrition_preferences: data.nutrition ?? DEFAULT_NUTRITION,
         agreed_to_disclaimer_at: new Date().toISOString(),
         onboarded: true,
       }).eq("user_id", user.id);
