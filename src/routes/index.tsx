@@ -33,25 +33,31 @@ function Home() {
     if (loading) return;
     if (!user) { navigate({ to: "/welcome" }); return; }
     (async () => {
-      const { data: p } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle();
-      if (!p?.onboarded) { navigate({ to: "/onboarding" }); return; }
-      setProfile(p);
-
       const today = new Date().toISOString().slice(0, 10);
-      const { data: w } = await supabase.from("workouts").select("*")
-        .eq("user_id", user.id).gte("scheduled_date", today)
-        .order("scheduled_date", { ascending: true }).limit(1).maybeSingle();
-      setTodayWorkout(w);
-
-      const { data: c } = await supabase.from("daily_checkins").select("*")
-        .eq("user_id", user.id).eq("checkin_date", today).maybeSingle();
-      setCheckin(c);
-
       const startOfWeek = new Date();
       startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-      const { count: weekDone } = await supabase.from("workout_logs").select("*", { count: "exact", head: true })
-        .eq("user_id", user.id).gte("started_at", startOfWeek.toISOString());
-      const { count: total } = await supabase.from("workout_logs").select("*", { count: "exact", head: true }).eq("user_id", user.id);
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      // Parallelize all initial reads — was 5 sequential round-trips, now 1.
+      const [profileRes, workoutRes, checkinRes, weekDoneRes, totalRes] = await Promise.all([
+        supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.from("workouts").select("*")
+          .eq("user_id", user.id).gte("scheduled_date", today)
+          .order("scheduled_date", { ascending: true }).limit(1).maybeSingle(),
+        supabase.from("daily_checkins").select("*")
+          .eq("user_id", user.id).eq("checkin_date", today).maybeSingle(),
+        supabase.from("workout_logs").select("*", { count: "exact", head: true })
+          .eq("user_id", user.id).gte("started_at", startOfWeek.toISOString()),
+        supabase.from("workout_logs").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+      ]);
+
+      const p = profileRes.data;
+      if (!p?.onboarded) { navigate({ to: "/onboarding" }); return; }
+      setProfile(p);
+      setTodayWorkout(workoutRes.data);
+      setCheckin(checkinRes.data);
+      const weekDone = weekDoneRes.count;
+      const total = totalRes.count;
 
       setStats({
         workouts: total ?? 0,

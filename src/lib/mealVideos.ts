@@ -145,8 +145,8 @@ export function videoForRecipe(opts: RecipeLike, offset = 0): MealVideoMeta {
 
 export function thumbForRecipe(opts: RecipeLike, offset = 0): string {
   const pick = pickVideo(opts, offset);
-  // hqdefault is universally available; maxresdefault sometimes 404s.
-  return `https://img.youtube.com/vi/${pick.id}/hqdefault.jpg`;
+  // mqdefault is small (~10KB) and loads instantly on mobile.
+  return `https://i.ytimg.com/vi/${pick.id}/mqdefault.jpg`;
 }
 
 // Used by chat "regenerate video" intent — pick a different real video.

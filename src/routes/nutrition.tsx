@@ -73,11 +73,14 @@ function Nutrition() {
     if (loading) return;
     if (!user) { navigate({ to: "/auth" }); return; }
     (async () => {
-      const { data: p } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle();
-      setProfile(p);
       const since = new Date(); since.setHours(0, 0, 0, 0);
-      const { data: m } = await supabase.from("meal_logs").select("*").eq("user_id", user.id).gte("eaten_at", since.toISOString()).order("eaten_at", { ascending: false });
-      setMeals((m ?? []) as Meal[]);
+      // Parallelize profile + meals
+      const [profRes, mealsRes] = await Promise.all([
+        supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.from("meal_logs").select("*").eq("user_id", user.id).gte("eaten_at", since.toISOString()).order("eaten_at", { ascending: false }),
+      ]);
+      setProfile(profRes.data);
+      setMeals((mealsRes.data ?? []) as Meal[]);
       setBusy(false);
       if (typeof window !== "undefined" && sessionStorage.getItem("forge:autogen-plan") === "1") {
         sessionStorage.removeItem("forge:autogen-plan");
