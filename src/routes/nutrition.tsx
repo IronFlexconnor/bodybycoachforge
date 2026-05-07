@@ -252,6 +252,21 @@ function Nutrition() {
           </div>
         )}
 
+        <Link
+          to="/fresh-meals"
+          className="group relative mb-4 flex items-center gap-3 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-card p-4 shadow-card hover:border-primary/60"
+        >
+          <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/25 blur-3xl" />
+          <div className="relative grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-primary text-primary-foreground shadow-glow">
+            <ChefHat className="h-5 w-5" />
+          </div>
+          <div className="relative flex-1 min-w-0">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-primary">Fresh today</div>
+            <div className="font-semibold leading-tight">Today's Fresh Meals</div>
+            <p className="truncate text-xs text-muted-foreground">5,000+ meals · prep videos · smart swaps</p>
+          </div>
+        </Link>
+
         {/* Surprise Me hero */}
         <button
           onClick={() => openRegen("Surprise me with completely fresh meals for tonight that match my macros and dietary preferences.")}
