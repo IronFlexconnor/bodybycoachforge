@@ -1,4 +1,5 @@
-// Analyze a workout video for form. Receives base64 frames + exercise name, returns score + cues.
+// Analyze a workout video/photo for form. Receives base64 frames + exercise name.
+// Returns score + cues, tied to user's injuries and preferred units.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const cors = {
@@ -6,20 +7,29 @@ const cors = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SYS = `You are an elite strength coach analyzing exercise form from sequential video frames.
+const buildSys = (injuries: string | null, units: "imperial" | "metric") => {
+  const wu = units === "imperial" ? "lbs" : "kg";
+  return `You are an elite strength & conditioning coach analyzing exercise form from sequential video frames or a single static photo.
 
-Return ONLY a JSON object:
+User context:
+- Reported injuries / limitations: ${injuries?.trim() ? injuries : "none reported"}
+- Preferred weight unit: ${wu} (use this in any weight suggestion)
+
+Return ONLY a JSON object with this exact shape:
 {
   "score": 0-100,
   "summary": "1-2 sentence professional verdict",
-  "good": ["positive points"],
-  "fixes": ["specific corrections, ordered by priority"],
-  "cues": ["3-5 short coaching cues to use next time"],
-  "next_session_adjustment": "Concrete adjustment for the next workout (load/tempo/range)",
-  "safety_flags": ["any injury risk concerns, empty array if none"]
+  "good": ["positive points (max 3)"],
+  "fixes": ["3-4 specific corrections, ordered by priority — actionable, reference body parts/joint angles/bar paths"],
+  "cues": ["3-4 short coaching cues (3-6 words each)"],
+  "next_session_adjustment": "One concrete change for the next set: 'Drop load 10 ${wu}', 'Add 1 rep', 'Slow eccentric to 3s', etc.",
+  "weight_delta": { "value": number, "unit": "${wu}", "direction": "increase" | "decrease" | "hold" },
+  "safety_flags": ["concerns tied to reported injuries — empty array if none"],
+  "alternative_exercise": "If form/injury risk is high, suggest a safer variation; else null"
 }
 
-Be specific. Reference body parts, joint angles, bar paths. No fluff.`;
+Be specific, professional, no fluff. If the input is a single still image, judge the position only.`;
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
@@ -36,10 +46,19 @@ Deno.serve(async (req) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: cors });
 
-    const { exercise, frames, storage_path } = await req.json();
+    const { exercise, frames, storage_path, media_type } = await req.json();
     if (!Array.isArray(frames) || frames.length === 0) {
       return new Response(JSON.stringify({ error: "No frames provided" }), { status: 400, headers: cors });
     }
+
+    // Fetch user profile for injury-aware analysis + units
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("injuries, units")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const injuries = (profile?.injuries as string | null) ?? null;
+    const units = ((profile?.units as string) === "metric" ? "metric" : "imperial") as "imperial" | "metric";
 
     // --- Plan limits ---
     const { getPlanTier, countUsage, logUsage, FREE_LIMITS } = await import("../_shared/entitlements.ts");
@@ -51,14 +70,9 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({
           error: "limit_reached",
           code: "video_monthly_limit",
-          message: `You've used your ${FREE_LIMITS.video_per_month} free video form analyses this month. Upgrade to Elite AI Coach for unlimited form checks.`,
+          message: `You've used your ${FREE_LIMITS.video_per_month} free form analyses this month. Upgrade for unlimited form checks.`,
         }), { status: 402, headers: { ...cors, "Content-Type": "application/json" } });
       }
-    } else if (tier === "pro") {
-      // Pro tier still gets unlimited video; only free is limited.
-    }
-    if (tier !== "elite" && tier !== "pro") {
-      // free path already gated above
     }
     await logUsage(user.id, "video");
 
@@ -70,8 +84,9 @@ Deno.serve(async (req) => {
       status: "analyzing",
     }).select().single();
 
+    const isPhoto = media_type === "photo" || frames.length === 1;
     const userContent: any[] = [
-      { type: "text", text: `Exercise: ${exercise ?? "unknown"}. ${frames.length} sequential frames follow. Analyze form and return JSON.` },
+      { type: "text", text: `Exercise: ${exercise ?? "unknown movement"}. ${isPhoto ? "A single still photo" : `${frames.length} sequential video frames`} follow. Analyze form and return JSON only.` },
       ...frames.map((b64: string) => ({
         type: "image_url",
         image_url: { url: b64.startsWith("data:") ? b64 : `data:image/jpeg;base64,${b64}` },
@@ -82,9 +97,10 @@ Deno.serve(async (req) => {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        // Fastest multimodal model on the gateway
+        model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: SYS },
+          { role: "system", content: buildSys(injuries, units) },
           { role: "user", content: userContent },
         ],
         response_format: { type: "json_object" },
