@@ -82,14 +82,22 @@ function Chat() {
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
+  const MEAL_REGEN_REGEX = /\b(regenerate|new meals?|fresh meals?|surprise me|swap meals?|different meals?|other meals?|more meal options|new (breakfast|lunch|dinner|snack)|other (breakfast|lunch|dinner|snack))\b/i;
+  const isMealRegen = (t: string) => MEAL_REGEN_REGEX.test(t);
+
   const send = async (text: string) => {
     if (!text.trim() || streaming || !session) return;
     setInput("");
     setMessages((m) => [...m, { role: "user", content: text }, { role: "assistant", content: "" }]);
     setStreaming(true);
 
-    // Real-time plan adjustment (fires in parallel with streaming reply)
-    if (isAdjustIntent(text)) {
+    // Meal regeneration → open modal directly on Nutrition page
+    if (isMealRegen(text)) {
+      toast.success("✨ Whipping up fresh meals…");
+      if (typeof window !== "undefined") sessionStorage.setItem("forge:open-regen", text);
+      setTimeout(() => navigate({ to: "/nutrition" }), 400);
+    } else if (isAdjustIntent(text)) {
+      // Real-time plan adjustment (fires in parallel with streaming reply)
       toast.loading("Coach is updating your plan…", { id: "adjust" });
       triggerAdjust(text).finally(() => toast.dismiss("adjust"));
     }

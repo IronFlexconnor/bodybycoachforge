@@ -181,12 +181,31 @@ function Home() {
           <Card icon={TrendingUp} title="Adherence" value={`${Math.round(((stats.weekDone) / Math.max(1, stats.weekTotal)) * 100)}%`} sub="This week" />
         </div>
 
+        <button
+          onClick={() => {
+            if (typeof window !== "undefined") sessionStorage.setItem("forge:open-regen", "1");
+            navigate({ to: "/nutrition" });
+          }}
+          className="group relative mt-4 flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-card p-4 text-left shadow-card hover:border-primary/60"
+        >
+          <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/20 blur-3xl" />
+          <div className="relative grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-primary text-primary-foreground shadow-glow">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div className="relative flex-1 min-w-0">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-primary">Fresh meals ready</div>
+            <div className="font-semibold leading-tight">8 brand-new meals waiting for you</div>
+            <p className="truncate text-xs text-muted-foreground">Tap to see prep videos & swap into your plan</p>
+          </div>
+          <ChevronRight className="relative h-5 w-5 text-muted-foreground" />
+        </button>
+
         <Button
           onClick={() => {
             if (typeof window !== "undefined") sessionStorage.setItem("forge:autogen-plan", "1");
             navigate({ to: "/nutrition" });
           }}
-          className="mt-4 h-12 w-full rounded-xl bg-gradient-primary font-semibold text-primary-foreground shadow-glow"
+          className="mt-3 h-12 w-full rounded-xl bg-gradient-primary font-semibold text-primary-foreground shadow-glow"
         >
           <Sparkles className="mr-2 h-4 w-4" /> Generate my meal plan
         </Button>

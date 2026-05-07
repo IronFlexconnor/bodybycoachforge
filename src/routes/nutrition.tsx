@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Apple, Loader2, Plus, Sparkles, Trash2, ArrowLeft, Target, ChefHat, ChevronDown, ShoppingCart, BookOpen, PlayCircle, RefreshCcw } from "lucide-react";
+import { Apple, Loader2, Plus, Sparkles, Trash2, ArrowLeft, Target, ChefHat, ChevronDown, ShoppingCart, BookOpen, PlayCircle, RefreshCcw, Wand2, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { buildMealPlan, calculateMacroTargets, reviewLoggedMeals } from "../../supabase/functions/nutrition-coach/planner";
+import { MealRegenerationModal } from "@/components/MealRegenerationModal";
+import { videoForRecipe } from "@/lib/mealVideos";
 
 export const Route = createFileRoute("/nutrition")({
   head: () => ({ meta: [{ title: "Nutrition — Body Forge" }] }),
@@ -62,6 +64,10 @@ function Nutrition() {
   const [openPrep, setOpenPrep] = useState<string | null>(null);
   const [libCat, setLibCat] = useState<"Breakfast" | "Lunch" | "Dinner" | "Snack">("Breakfast");
   const [libOpen, setLibOpen] = useState<string | null>(null);
+  const [regenOpen, setRegenOpen] = useState(false);
+  const [regenPrompt, setRegenPrompt] = useState<string | undefined>();
+
+  const openRegen = (prompt?: string) => { setRegenPrompt(prompt); setRegenOpen(true); };
 
   useEffect(() => {
     if (loading) return;
@@ -76,6 +82,13 @@ function Nutrition() {
       if (typeof window !== "undefined" && sessionStorage.getItem("forge:autogen-plan") === "1") {
         sessionStorage.removeItem("forge:autogen-plan");
         setTimeout(() => generatePlan(), 200);
+      }
+      if (typeof window !== "undefined") {
+        const regenFlag = sessionStorage.getItem("forge:open-regen");
+        if (regenFlag) {
+          sessionStorage.removeItem("forge:open-regen");
+          setTimeout(() => openRegen(regenFlag === "1" ? undefined : regenFlag), 250);
+        }
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -235,6 +248,28 @@ function Nutrition() {
             </div>
           </div>
         )}
+
+        {/* Surprise Me hero */}
+        <button
+          onClick={() => openRegen("Surprise me with completely fresh meals for tonight that match my macros and dietary preferences.")}
+          className="group relative mb-4 block w-full overflow-hidden rounded-3xl border border-primary/30 bg-gradient-card p-5 text-left shadow-card transition hover:border-primary/60"
+        >
+          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/30 blur-3xl" />
+          <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-accent/20 blur-3xl" />
+          <div className="relative flex items-center gap-4">
+            <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-primary text-primary-foreground shadow-glow">
+              <Wand2 className="h-6 w-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="mb-1 inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                <Sparkles className="h-3 w-3" /> Surprise me tonight
+              </div>
+              <div className="text-base font-bold leading-tight">8 brand-new meals, picked for you</div>
+              <p className="text-xs text-muted-foreground">Macro-perfect · with prep videos · tap to swap</p>
+            </div>
+            <Zap className="h-5 w-5 text-primary transition-transform group-hover:scale-125" />
+          </div>
+        </button>
 
         <div className="mb-3 flex gap-2">
           <Button onClick={() => setAdding(true)} variant="outline" className="flex-1 h-11 rounded-xl border-border bg-surface"><Plus className="mr-1 h-4 w-4" /> Log meal</Button>
@@ -539,6 +574,30 @@ function Nutrition() {
           </div>
         )}
       </div>
+
+      {/* Floating Regenerate Meals button */}
+      <button
+        onClick={() => openRegen()}
+        className="fixed bottom-24 right-5 z-30 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-gradient-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-glow hover:scale-105 active:scale-95 transition"
+        aria-label="Regenerate meals"
+      >
+        <Wand2 className="h-4 w-4" /> Regenerate
+      </button>
+
+      <MealRegenerationModal
+        open={regenOpen}
+        onClose={() => setRegenOpen(false)}
+        initialPrompt={regenPrompt}
+        userAllergens={profile?.nutrition_preferences?.allergies ?? []}
+        userDiets={profile?.nutrition_preferences?.diets ?? []}
+        macroTargets={profile?.macro_targets ?? null}
+        onSwapped={async () => {
+          if (!user) return;
+          const since = new Date(); since.setHours(0, 0, 0, 0);
+          const { data: m } = await supabase.from("meal_logs").select("*").eq("user_id", user.id).gte("eaten_at", since.toISOString()).order("eaten_at", { ascending: false });
+          setMeals((m ?? []) as Meal[]);
+        }}
+      />
     </AppShell>
   );
 }
@@ -556,17 +615,39 @@ function MacroBar({ label, value, target, color }: { label: string; value: numbe
   );
 }
 
-function MealPrepVideo({ video, title }: { video: { url: string; title?: string; duration_seconds?: number; description?: string }; title: string }) {
+function MealPrepVideo({ video, title }: { video: { url?: string; title?: string; duration_seconds?: number; description?: string }; title: string }) {
+  const [playing, setPlaying] = useState(false);
+  const yt = videoForRecipe({ slug: title, title });
+  const thumb = `https://img.youtube.com/vi/${yt.id}/hqdefault.jpg`;
   return (
     <div className="overflow-hidden rounded-xl border border-primary/20 bg-primary/5">
       <div className="flex items-center justify-between gap-2 border-b border-primary/10 px-3 py-2 text-[11px] font-semibold text-primary">
-        <span className="inline-flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5" /> Meal-making video</span>
-        <span>{video.duration_seconds ?? 9}s</span>
+        <span className="inline-flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5" /> Meal-prep video</span>
+        <a href={yt.watchUrl} target="_blank" rel="noreferrer" className="underline">Watch full</a>
       </div>
-      <video controls preload="metadata" playsInline className="aspect-video w-full bg-background" aria-label={`${title} meal-making video`}>
-        <source src={video.url} type="video/mp4" />
-      </video>
-      <p className="px-3 py-2 text-[11px] text-muted-foreground">{video.title || video.description || `Short prep demo for ${title}`}</p>
+      <div className="relative aspect-video w-full bg-black">
+        {playing ? (
+          <iframe
+            src={`${yt.embedUrl}&autoplay=1`}
+            title={`${title} prep video`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 h-full w-full"
+          />
+        ) : (
+          <button onClick={() => setPlaying(true)} className="group absolute inset-0 h-full w-full">
+            <img src={thumb} alt={`${title} prep video thumbnail`} className="h-full w-full object-cover" loading="lazy" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+            <div className="absolute inset-0 grid place-items-center">
+              <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/90 text-primary-foreground shadow-glow transition-transform group-hover:scale-110">
+                <PlayCircle className="h-6 w-6" />
+              </div>
+            </div>
+            <div className="absolute bottom-2 left-3 right-3 text-left text-xs font-semibold text-white drop-shadow">{title}</div>
+          </button>
+        )}
+      </div>
+      <p className="px-3 py-2 text-[11px] text-muted-foreground">Tap to autoplay · short prep demo for {title}</p>
     </div>
   );
 }
