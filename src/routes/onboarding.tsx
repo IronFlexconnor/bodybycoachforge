@@ -83,6 +83,7 @@ function Onboarding() {
           injurySelected: parseInjuries(p.injuries).selected,
           injuryNotes: parseInjuries(p.injuries).notes,
           agreedToDisclaimer: !!(p as any).agreed_to_disclaimer,
+          nutrition: { ...DEFAULT_NUTRITION, ...((p as any).nutrition_preferences ?? {}) },
           weight: fromMetricWeight(p.weight, u),
           heightUnit: hu,
           heightFeet: ft.feet,
