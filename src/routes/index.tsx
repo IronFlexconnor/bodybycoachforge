@@ -169,6 +169,8 @@ function Home() {
 
         <DailyFreshPicks />
 
+        <InsightsCarousel />
+
         <Link to="/form" className="mb-3 flex items-center gap-4 rounded-2xl border border-primary/30 bg-gradient-card p-4 shadow-card hover:border-primary/60">
           <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-primary text-primary-foreground shadow-glow">
             <Sparkles className="h-5 w-5" />
