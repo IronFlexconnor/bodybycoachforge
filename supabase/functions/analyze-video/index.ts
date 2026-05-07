@@ -121,6 +121,7 @@ function safeFallback(exercise: string | null, mediaType: string | null, units: 
     compensation_patterns: [],
     muscle_activation: [],
     good: ["Upload was received", "Movement intent looks committed"],
+    findings: [],
     fixes: ["Film from a 45° side angle so hips, knees, and torso are fully visible", "Brace before each rep and keep torso position consistent", "Use a controlled 2–3 second lowering phase", "Stop or regress if pain changes the movement path"],
     cues: ["Brace first", "Full foot pressure", "Control the lowering", "Smooth finish"],
     safety_flags: [],
