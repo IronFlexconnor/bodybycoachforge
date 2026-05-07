@@ -226,10 +226,30 @@ function Nutrition() {
 
         <div className="mb-3 flex gap-2">
           <Button onClick={() => setAdding(true)} variant="outline" className="flex-1 h-11 rounded-xl border-border bg-surface"><Plus className="mr-1 h-4 w-4" /> Log meal</Button>
-          <Button onClick={suggestMeals} disabled={suggesting} variant="outline" className="flex-1 h-11 rounded-xl border-border bg-surface">
+          <Button onClick={() => suggestMeals()} disabled={suggesting} variant="outline" className="flex-1 h-11 rounded-xl border-border bg-surface">
             {suggesting ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1 h-4 w-4" />} Suggest
           </Button>
         </div>
+
+        {/* Quick suggestion presets */}
+        <div className="mb-4 rounded-2xl border border-border/60 bg-gradient-card p-4 shadow-card">
+          <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+            <Sparkles className="h-3 w-3" /> Suggestions
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { label: "Quick high-protein", prompt: "A fast 10-minute high-protein meal hitting 40g+ protein." },
+              { label: "Post-workout", prompt: "A post-workout meal with fast carbs + lean protein for recovery." },
+              { label: "Generate for today", prompt: "Suggest breakfast, lunch, dinner and a snack for today only." },
+              { label: "Swap a meal", prompt: "Suggest 3 macro-equivalent allergy-safe swaps for my logged meals." },
+            ].map((p) => (
+              <Button key={p.label} onClick={() => suggestMeals(p.prompt)} disabled={suggesting} variant="outline" size="sm" className="h-10 rounded-xl border-border bg-surface text-xs">
+                {p.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+
 
         {adding && (
           <div className="mb-4 rounded-2xl border border-primary/30 bg-gradient-card p-4 space-y-2 shadow-card">
