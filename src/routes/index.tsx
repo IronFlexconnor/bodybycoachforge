@@ -11,6 +11,7 @@ import { AdjustmentsCard } from "@/components/AdjustmentsCard";
 import { DailyFreshPicks } from "@/components/DailyFreshPicks";
 import { InsightsCarousel } from "@/components/InsightsCarousel";
 import { celebrate } from "@/lib/celebrate";
+import { GoalSelector } from "@/components/GoalSelector";
 
 export const Route = createFileRoute("/")({
   head: () => ({
