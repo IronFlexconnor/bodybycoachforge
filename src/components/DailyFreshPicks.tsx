@@ -122,17 +122,15 @@ export function DailyFreshPicks() {
                           }}
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
-                        <div className="absolute inset-0 grid place-items-center">
-                          <span className="grid h-14 w-14 place-items-center rounded-full bg-white/95 text-foreground shadow-glow transition-transform group-hover:scale-110">
-                            <Play className="h-6 w-6 fill-current" />
-                          </span>
-                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
                         <div className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur">
                           {p.meal_type}
                         </div>
                         <div className="absolute right-2 top-2 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground shadow-glow">
                           Fresh
+                        </div>
+                        <div className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-[10px] font-semibold text-white backdrop-blur-md ring-1 ring-white/25">
+                          <Play className="h-3 w-3 fill-current" /> Prep video
                         </div>
                       </div>
                     </button>

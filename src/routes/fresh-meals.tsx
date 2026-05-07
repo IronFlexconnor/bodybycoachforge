@@ -297,11 +297,9 @@ function HeroCard({ recipe, onOpen, onSave, isFav, onSwap }: {
             onError={(e) => { const img = e.currentTarget; const fb = thumbFallbackForRecipe(recipe); if (img.src !== fb) img.src = fb; }}
             className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
-          <div className="absolute inset-0 grid place-items-center">
-            <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-foreground shadow-glow">
-              <Play className="h-7 w-7 fill-current" />
-            </span>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+          <div className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md ring-1 ring-white/30">
+            <Play className="h-3 w-3 fill-current" /> Prep video
           </div>
           <div className="absolute left-3 top-3 rounded-full bg-primary/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-glow">
             Fresh hero
@@ -355,17 +353,15 @@ function Row({ title, subtitle, items, onOpen, onSave, isFav }: {
                         onError={(e) => { const img = e.currentTarget; const fb = thumbFallbackForRecipe(r); if (img.src !== fb) img.src = fb; }}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
-                      <div className="absolute inset-0 grid place-items-center">
-                        <span className="grid h-12 w-12 place-items-center rounded-full bg-white/95 text-foreground shadow-glow transition-transform group-hover:scale-110">
-                          <Play className="h-5 w-5 fill-current" />
-                        </span>
-                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
                       <div className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur">
                         {r.meal_type}
                       </div>
                       <div className="absolute right-2 top-2 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground shadow-glow">
                         {(r.prep_minutes + r.cook_minutes)}m
+                      </div>
+                      <div className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-[10px] font-semibold text-white backdrop-blur-md ring-1 ring-white/25">
+                        <Play className="h-3 w-3 fill-current" /> Prep video
                       </div>
                     </div>
                   </button>
