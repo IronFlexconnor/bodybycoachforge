@@ -273,6 +273,90 @@ function Nutrition() {
               </details>
             )}
 
+            {plan.days?.length > 0 && (() => {
+              const buckets: Record<string, Array<{ meal: any; day: any; di: number; mi: number }>> = { Breakfast: [], Lunch: [], Dinner: [], Snack: [] };
+              plan.days.forEach((day: any, di: number) => {
+                day.meals?.forEach((meal: any, mi: number) => {
+                  const slot = (meal.slot || "").toLowerCase();
+                  let key: keyof typeof buckets = "Snack";
+                  if (slot.includes("break")) key = "Breakfast";
+                  else if (slot.includes("lunch")) key = "Lunch";
+                  else if (slot.includes("din")) key = "Dinner";
+                  else if (slot.includes("post") || slot.includes("snack")) key = "Snack";
+                  else if (mi === 0) key = "Breakfast";
+                  else if (mi === 1) key = "Lunch";
+                  else if (mi === 2) key = "Dinner";
+                  buckets[key].push({ meal, day, di, mi });
+                });
+              });
+              const list = buckets[libCat];
+              return (
+                <div className="rounded-2xl border border-primary/20 bg-gradient-card p-4 shadow-card">
+                  <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+                    <BookOpen className="h-3 w-3" /> Meal library
+                  </div>
+                  <div className="-mx-1 mb-3 flex gap-1.5 overflow-x-auto px-1 pb-1">
+                    {(["Breakfast", "Lunch", "Dinner", "Snack"] as const).map((c) => (
+                      <button key={c} onClick={() => setLibCat(c)}
+                        className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${libCat === c ? "border-primary bg-primary/15 text-primary" : "border-border bg-surface text-muted-foreground"}`}>
+                        {c} <span className="ml-1 opacity-60">{buckets[c].length}</span>
+                      </button>
+                    ))}
+                  </div>
+                  {list.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No {libCat.toLowerCase()} meals in this plan.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {list.map(({ meal, day, di, mi }) => {
+                        const k = `lib-${di}-${mi}`;
+                        const open = libOpen === k;
+                        const q = encodeURIComponent(meal.search_query || `${meal.title} meal prep recipe`);
+                        return (
+                          <div key={k} className="rounded-xl border border-border/60 bg-surface p-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <div className="text-[10px] uppercase tracking-wider text-primary">{day.day} · {meal.slot}</div>
+                                <div className="font-semibold leading-tight">{meal.title}</div>
+                                <div className="mt-0.5 text-xs text-muted-foreground">{meal.calories} kcal · {meal.protein_g}P / {meal.carbs_g}C / {meal.fat_g}F</div>
+                              </div>
+                              <Button size="sm" onClick={() => addSuggested({ name: meal.slot, title: meal.title, calories: meal.calories, protein_g: meal.protein_g, carbs_g: meal.carbs_g, fat_g: meal.fat_g })} className="rounded-lg bg-gradient-primary text-primary-foreground">Add</Button>
+                            </div>
+                            <button onClick={() => setLibOpen(open ? null : k)} className="mt-2 text-xs font-semibold text-primary">
+                              {open ? "Hide details" : "Recipe & meal prep"}
+                            </button>
+                            {open && (
+                              <div className="mt-2 space-y-2">
+                                <a href={`https://www.youtube.com/results?search_query=${q}`} target="_blank" rel="noreferrer"
+                                  className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1.5 text-[11px] font-semibold text-primary hover:bg-primary/15">
+                                  ▶ Watch meal-prep video
+                                </a>
+                                {meal.ingredients_with_units?.length > 0 && (
+                                  <div><div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Ingredients</div>
+                                    <ul className="mt-1 text-xs text-muted-foreground">{meal.ingredients_with_units.map((ing: string, k2: number) => <li key={k2}>· {ing}</li>)}</ul></div>
+                                )}
+                                {meal.instructions?.length > 0 && (
+                                  <div><div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Cook</div>
+                                    <ol className="mt-1 list-decimal pl-4 text-xs text-muted-foreground space-y-0.5">{meal.instructions.map((s: string, k2: number) => <li key={k2}>{s}</li>)}</ol></div>
+                                )}
+                                {meal.meal_prep && (
+                                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-2.5 text-xs text-muted-foreground space-y-1">
+                                    {meal.meal_prep.batch_cook && <div><span className="font-semibold text-foreground">Batch cook:</span> {meal.meal_prep.batch_cook}</div>}
+                                    {meal.meal_prep.store && <div><span className="font-semibold text-foreground">Store:</span> {meal.meal_prep.store}</div>}
+                                    {meal.meal_prep.reheat && <div><span className="font-semibold text-foreground">Reheat:</span> {meal.meal_prep.reheat}</div>}
+                                    {meal.meal_prep.substitutions?.length > 0 && <div><span className="font-semibold text-foreground">Subs:</span> {meal.meal_prep.substitutions.join(", ")}</div>}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             {plan.days?.map((day: any, di: number) => {
               const isOpen = openDay === di;
               return (
