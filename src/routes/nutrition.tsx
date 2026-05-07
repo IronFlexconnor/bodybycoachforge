@@ -105,7 +105,7 @@ function Nutrition() {
         const { data: mData, error: mErr } = await supabase.functions.invoke("nutrition-coach", { body: { action: "calc_macros" } });
         toast.dismiss("macros");
         if (mErr) throw mErr;
-        if ((mData as any)?.error === "limit_reached") {
+        if (isNutritionLimit(mData)) {
           setPaywall({ open: true, reason: (mData as any).message, recommend: "pro" });
           return;
         }
@@ -117,8 +117,8 @@ function Nutrition() {
         body: { action: "meal_plan", prompt: overridePrompt || planPrompt || undefined },
       });
       const d: any = data;
-      if (d?.error === "limit_reached") {
-        setPaywall({ open: true, reason: d.message, recommend: "pro" });
+      if (isNutritionLimit(d) || ((error as any)?.context?.status === 402)) {
+        setPaywall({ open: true, reason: d?.message || "Personalized meal plans are part of Pro Coach.", recommend: "pro" });
         return;
       }
       if (error) throw error;
@@ -132,7 +132,7 @@ function Nutrition() {
       toast.success(`${d.days.length}-day macro-matched plan ready`);
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.message || "Couldn't generate meal plan");
+      toast.error(nutritionErrorMessage(e, "Couldn't generate meal plan — please try again from Nutrition."));
     } finally { setPlanning(false); }
   };
 
@@ -145,13 +145,13 @@ function Nutrition() {
     try {
       const { data, error } = await supabase.functions.invoke("nutrition-coach", { body: { action: "review_day" } });
       const d: any = data;
-      if (d?.error === "limit_reached") {
-        setPaywall({ open: true, reason: d.message, recommend: "pro" });
+      if (isNutritionLimit(d) || ((error as any)?.context?.status === 402)) {
+        setPaywall({ open: true, reason: d?.message || "Nutrition coaching reviews are part of Pro Coach.", recommend: "pro" });
         return;
       }
       if (error) throw error;
       setReview(d);
-    } catch { toast.error("Couldn't generate review"); } finally { setReviewing(false); }
+    } catch (e) { toast.error(nutritionErrorMessage(e, "Couldn't generate review — please try again.")); } finally { setReviewing(false); }
   };
 
   const addMeal = async () => {
