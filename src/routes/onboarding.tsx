@@ -199,6 +199,17 @@ function Onboarding() {
       { title: "Diet preference", subtitle: "Used for nutrition & meal suggestions.", valid: !!data.diet,
         body: <ChipsLarge options={diets} value={data.diet} onSelect={(v) => update("diet", v)} /> },
       {
+        title: "Tell us about your nutrition needs",
+        subtitle: "Allergies, dietary restrictions, and meal timing — your AI nutrition coach uses this to plan meals that match your training.",
+        valid: true,
+        body: (
+          <NutritionPreferencesForm
+            value={data.nutrition ?? DEFAULT_NUTRITION}
+            onChange={(v) => setData((d) => ({ ...d, nutrition: v }))}
+          />
+        ),
+      },
+      {
         title: "Important Legal Agreement & Disclaimer",
         subtitle: "Please read carefully before continuing.",
         valid: !!data.agreedToDisclaimer,
