@@ -181,11 +181,13 @@ Deno.serve(async (req) => {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("injuries, units, goal")
+      .select("injuries, units, goal, level")
       .eq("user_id", user.id)
       .maybeSingle();
     const injuries = (profile?.injuries as string | null) ?? null;
     const units = ((profile?.units as string) === "metric" ? "metric" : "imperial") as "imperial" | "metric";
+    const goal = (profile?.goal as string | null) ?? "general fitness";
+    const level = (profile?.level as string | null) ?? "intermediate";
 
     // --- Plan limits (entitlements remain enforced server-side) ---
     const { getPlanTier, countUsage, logUsage, FREE_LIMITS } = await import("../_shared/entitlements.ts");
