@@ -106,36 +106,47 @@ export function DailyFreshPicks() {
             {items.map((p) => {
               const thumb = thumbForRecipe(p);
               return (
-                <li key={p.id} className="snap-start shrink-0 w-[68%] sm:w-[46%]">
-                  <button
-                    onClick={open}
-                    className="group block w-full overflow-hidden rounded-2xl border border-border/60 bg-gradient-card text-left shadow-card transition hover:border-primary/50 active:scale-[0.98]"
-                  >
-                    <div className="relative aspect-video overflow-hidden bg-muted">
-                      <img
-                        src={thumb}
-                        alt={p.title}
-                        loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                      <div className="absolute inset-0 grid place-items-center">
-                        <span className="grid h-11 w-11 place-items-center rounded-full bg-white/90 text-foreground shadow-glow">
-                          <Play className="h-5 w-5 fill-current" />
-                        </span>
+                <li key={p.id} className="snap-start shrink-0 w-[78%] sm:w-[48%] lg:w-[32%]">
+                  <div className="group relative w-full overflow-hidden rounded-2xl border border-border/60 bg-gradient-card text-left shadow-card transition hover:border-primary/50">
+                    <button onClick={open} className="block w-full text-left active:scale-[0.99]">
+                      <div className="relative aspect-video overflow-hidden bg-muted">
+                        <img
+                          src={thumb}
+                          alt={p.title}
+                          loading="lazy"
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+                        <div className="absolute inset-0 grid place-items-center">
+                          <span className="grid h-14 w-14 place-items-center rounded-full bg-white/95 text-foreground shadow-glow transition-transform group-hover:scale-110">
+                            <Play className="h-6 w-6 fill-current" />
+                          </span>
+                        </div>
+                        <div className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur">
+                          {p.meal_type}
+                        </div>
+                        <div className="absolute right-2 top-2 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground shadow-glow">
+                          Fresh
+                        </div>
                       </div>
-                      <div className="absolute left-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur">
-                        {p.meal_type}
-                      </div>
-                      <div className="absolute right-2 top-2 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground shadow-glow">
-                        Fresh
-                      </div>
-                    </div>
-                    <div className="p-3">
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={isFav(p.id) ? "Remove favorite" : "Save meal"}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const added = toggle({ id: p.id, slug: p.slug, title: p.title, meal_type: p.meal_type });
+                        toast.success(added ? "Saved to favorites" : "Removed from favorites");
+                      }}
+                      className="absolute right-2 bottom-[68px] z-10 grid h-9 w-9 place-items-center rounded-full bg-background/90 shadow-card backdrop-blur transition hover:scale-110"
+                    >
+                      <Heart className={`h-4 w-4 ${isFav(p.id) ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+                    </button>
+                    <button onClick={open} className="block w-full p-3 text-left">
                       <div className="line-clamp-1 text-sm font-semibold">{p.title}</div>
                       <div className="mt-1 text-[11px] text-muted-foreground">{p.calories} kcal · {Math.round(p.protein_g)}g protein</div>
-                    </div>
-                  </button>
+                    </button>
+                  </div>
                 </li>
               );
             })}
