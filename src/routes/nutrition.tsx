@@ -412,19 +412,7 @@ function Nutrition() {
 
                             {meal.training_rationale && <p className="mt-2 text-xs italic text-muted-foreground">{meal.training_rationale}</p>}
 
-                            {(() => {
-                              const q = encodeURIComponent(meal.search_query || `${meal.title} meal prep`);
-                              return (
-                                <a
-                                  href={`https://www.youtube.com/results?search_query=${q}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1.5 text-[11px] font-semibold text-primary hover:bg-primary/15"
-                                >
-                                  ▶ Watch meal-prep video
-                                </a>
-                              );
-                            })()}
+                            {meal.prep_video?.url && <div className="mt-3"><MealPrepVideo video={meal.prep_video} title={meal.title} /></div>}
 
                             {meal.ingredients_with_units?.length > 0 && (
                               <div className="mt-3">
@@ -529,6 +517,21 @@ function MacroBar({ label, value, target, color }: { label: string; value: numbe
       <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-border/60">
         <div className={`h-full ${color} transition-all`} style={{ width: `${pct}%` }} />
       </div>
+    </div>
+  );
+}
+
+function MealPrepVideo({ video, title }: { video: { url: string; title?: string; duration_seconds?: number; description?: string }; title: string }) {
+  return (
+    <div className="overflow-hidden rounded-xl border border-primary/20 bg-primary/5">
+      <div className="flex items-center justify-between gap-2 border-b border-primary/10 px-3 py-2 text-[11px] font-semibold text-primary">
+        <span className="inline-flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5" /> Meal-making video</span>
+        <span>{video.duration_seconds ?? 9}s</span>
+      </div>
+      <video controls preload="metadata" playsInline className="aspect-video w-full bg-background" aria-label={`${title} meal-making video`}>
+        <source src={video.url} type="video/mp4" />
+      </video>
+      <p className="px-3 py-2 text-[11px] text-muted-foreground">{video.title || video.description || `Short prep demo for ${title}`}</p>
     </div>
   );
 }
