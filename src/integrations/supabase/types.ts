@@ -35,6 +35,54 @@ export type Database = {
         }
         Relationships: []
       }
+      body_analyses: {
+        Row: {
+          bodyfat_estimate: number | null
+          comparison: string | null
+          created_at: string
+          feedback: string | null
+          front_path: string | null
+          id: string
+          muscle_notes: string | null
+          posture_notes: string | null
+          raw: Json | null
+          rear_path: string | null
+          side_path: string | null
+          user_id: string
+          weight: number | null
+        }
+        Insert: {
+          bodyfat_estimate?: number | null
+          comparison?: string | null
+          created_at?: string
+          feedback?: string | null
+          front_path?: string | null
+          id?: string
+          muscle_notes?: string | null
+          posture_notes?: string | null
+          raw?: Json | null
+          rear_path?: string | null
+          side_path?: string | null
+          user_id: string
+          weight?: number | null
+        }
+        Update: {
+          bodyfat_estimate?: number | null
+          comparison?: string | null
+          created_at?: string
+          feedback?: string | null
+          front_path?: string | null
+          id?: string
+          muscle_notes?: string | null
+          posture_notes?: string | null
+          raw?: Json | null
+          rear_path?: string | null
+          side_path?: string | null
+          user_id?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           attachments: Json | null
