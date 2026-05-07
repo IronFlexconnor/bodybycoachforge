@@ -419,6 +419,90 @@ export type Database = {
         }
         Relationships: []
       }
+      recipes: {
+        Row: {
+          allergens: string[]
+          calories: number
+          carbs_g: number
+          cook_minutes: number
+          created_at: string
+          cuisine: string | null
+          description: string | null
+          dietary_tags: string[]
+          difficulty: string
+          fat_g: number
+          hero_emoji: string | null
+          highlights: string[]
+          id: string
+          image_url: string | null
+          ingredients: Json
+          instructions: Json
+          meal_type: string
+          mood_tags: string[]
+          prep_minutes: number
+          protein_g: number
+          servings: number
+          shopping_list: Json
+          slug: string
+          swaps: Json
+          title: string
+        }
+        Insert: {
+          allergens?: string[]
+          calories?: number
+          carbs_g?: number
+          cook_minutes?: number
+          created_at?: string
+          cuisine?: string | null
+          description?: string | null
+          dietary_tags?: string[]
+          difficulty?: string
+          fat_g?: number
+          hero_emoji?: string | null
+          highlights?: string[]
+          id?: string
+          image_url?: string | null
+          ingredients?: Json
+          instructions?: Json
+          meal_type: string
+          mood_tags?: string[]
+          prep_minutes?: number
+          protein_g?: number
+          servings?: number
+          shopping_list?: Json
+          slug: string
+          swaps?: Json
+          title: string
+        }
+        Update: {
+          allergens?: string[]
+          calories?: number
+          carbs_g?: number
+          cook_minutes?: number
+          created_at?: string
+          cuisine?: string | null
+          description?: string | null
+          dietary_tags?: string[]
+          difficulty?: string
+          fat_g?: number
+          hero_emoji?: string | null
+          highlights?: string[]
+          id?: string
+          image_url?: string | null
+          ingredients?: Json
+          instructions?: Json
+          meal_type?: string
+          mood_tags?: string[]
+          prep_minutes?: number
+          protein_g?: number
+          servings?: number
+          shopping_list?: Json
+          slug?: string
+          swaps?: Json
+          title?: string
+        }
+        Relationships: []
+      }
       set_logs: {
         Row: {
           completed: boolean | null
