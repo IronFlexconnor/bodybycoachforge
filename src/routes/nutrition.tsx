@@ -78,6 +78,10 @@ function Nutrition() {
   };
 
   const generatePlan = async () => {
+    if (!profile?.macro_targets) {
+      toast.message("Set your macro targets first", { description: "Tap Calculate macros so your plan is built around your numbers." });
+      return;
+    }
     setPlanning(true);
     try {
       const { data, error } = await supabase.functions.invoke("nutrition-coach", {
@@ -89,10 +93,17 @@ function Nutrition() {
         return;
       }
       if (error) throw error;
+      if (!d?.days?.length) {
+        toast.error("The plan came back incomplete — please try again.");
+        return;
+      }
       setPlan(d);
       setOpenDay(0);
-      toast.success("Your training-synced meal plan is ready");
-    } catch { toast.error("Couldn't generate meal plan"); } finally { setPlanning(false); }
+      toast.success(`${d.days.length}-day dietitian plan ready`);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || "Couldn't generate meal plan");
+    } finally { setPlanning(false); }
   };
 
   const reviewDay = async () => {

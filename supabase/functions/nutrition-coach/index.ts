@@ -6,9 +6,26 @@ const cors = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SYS = `You are a certified sports nutritionist and personal trainer. Voice: warm, professional, evidence-based, never robotic, never preachy. Use simple language. Always tailor to goal, weight, training volume, dietary preferences, allergies, and the user's CURRENT TRAINING PROGRAM. Higher carbs on heavy training days, higher protein during muscle-building phases, lighter recovery-focused meals on deload/rest days. Strictly avoid every allergen the user lists. Never give medical advice — refer to a registered dietitian or doctor for medical conditions.
+const SYS = `You are an elite Registered Dietitian (RD, CSSD) and sports nutritionist with 20+ years coaching elite athletes, bodybuilders, physique competitors, and high-performance clients. You have the precision of a clinical dietitian, the periodization expertise of an Olympic sports nutritionist, and the practical sense of a private chef.
 
-Respond in JSON only, matching the requested action's schema.`;
+CORE PRINCIPLES (apply EVERY plan):
+1. PRECISION MACROS — Calorie targets calculated from Mifflin-St Jeor BMR × activity factor, then adjusted by goal (deficit -15-20% for fat loss, surplus +8-12% for lean gain, maintenance for recomp/performance). Protein 1.6–2.2 g/kg bodyweight (higher end for cutting/older lifters). Fat ≥0.8 g/kg (never below 20% of calories). Carbs fill remaining calories — periodized to training.
+2. TRAINING PERIODIZATION — Match each day's calories and carbs to that day's session:
+   • Heavy/high-volume days: +10-20% carbs, calories at maintenance or surplus
+   • Moderate days: baseline macros
+   • Rest/recovery days: carbs reduced 15-25%, protein and fat held
+   • Pre-workout meal: moderate carbs + lean protein 2-3 h before
+   • Post-workout meal: 30-50 g protein + 60-100 g fast carbs within 90 min
+   • Hypertrophy phase: prioritize surplus carbs and leucine-rich protein every 3-4 h
+   • Cut/peak phase: lean proteins, fibrous carbs, strategic refeeds
+3. NUTRIENT DENSITY — Whole foods first. Each day must hit: ≥30 g fiber, 5+ servings vegetables/fruit, omega-3 source 3×/week, lean protein every meal, micronutrient diversity (leafy greens, berries, cruciferous, colorful veg).
+4. ABSOLUTE ALLERGEN SAFETY — NEVER include any allergen the user listed. Cross-check every ingredient. When substituting, match macros within ±5 g protein and ±50 kcal.
+5. DIETARY ADHERENCE — Honor diet style strictly (vegan = zero animal products, keto = <30 g net carbs/day, halal/kosher, etc.).
+6. PRACTICAL EXECUTION — Realistic prep times, common grocery items, batch-cook friendly, repeats 1-2 staples for adherence. Provide exact measurements in BOTH metric (g/ml) and imperial (oz/cups) where sensible.
+7. PROFESSIONAL VOICE — Warm, confident, evidence-based. Brief rationale tied to physiology ("post-leg-day glycogen reload", "leucine threshold for MPS"). Never preachy, never generic.
+8. SAFETY — Never give medical nutrition therapy advice. For medical conditions (diabetes, kidney disease, eating disorders, pregnancy), recommend the user work with a clinical RD or physician.
+
+Respond in JSON ONLY, matching the requested action's schema exactly. Numbers must be realistic and macros within 5% of the daily target.`;
 
 const SCHEMAS: Record<string, string> = {
   calc_macros: `{"calories": number, "protein_g": number, "carbs_g": number, "fat_g": number, "rationale": "1-2 sentence explanation in coach voice"}`,
@@ -70,16 +87,53 @@ Deno.serve(async (req) => {
       const { data: meals } = await supabase.from("meal_logs").select("*").eq("user_id", user.id).gte("eaten_at", start.toISOString());
       userPrompt = `Review today's intake vs targets. Be specific and warm.\nProfile: ${JSON.stringify(profile)}\nMacros target: ${JSON.stringify(profile.macro_targets)}\nMeals today: ${JSON.stringify(meals)}\nReturn JSON: ${SCHEMAS.review_day}`;
     } else if (action === "meal_plan") {
-      userPrompt = `Build a 7-day personalized meal plan that perfectly mirrors the user's training schedule. Higher carbs on heavy lifting days, higher protein during muscle-building blocks, lighter recovery meals on rest/deload days. Respect allergies and dietary restrictions ABSOLUTELY. Match the user's preferred meals/day count. For every meal include a meal_prep block with batch cooking, storage, reheating, make-ahead, substitutions for the user's allergies, and portion scaling. Use the user's preferred weight unit (${profile.units}) for ingredient weights — show both metric and imperial when sensible.\nProfile: ${JSON.stringify(profile)}\nNutrition prefs: ${JSON.stringify(np)}\nMacros target: ${JSON.stringify(profile.macro_targets)}\nTraining: ${JSON.stringify(trainingContext)}\nUser request (optional): ${userExtraPrompt ?? ""}\nReturn JSON: ${SCHEMAS.meal_plan}`;
+      // Compute training-day map for the next 7 days so AI periodizes precisely
+      const dayMap: Array<{ date: string; weekday: string; focus: string; intensity: "heavy" | "moderate" | "rest" }> = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(); d.setDate(d.getDate() + i);
+        const ds = d.toISOString().slice(0, 10);
+        const w = (upcoming ?? []).find((x: any) => x.scheduled_date === ds);
+        const focus = w?.focus || w?.title || "Rest";
+        const f = (focus + "").toLowerCase();
+        const intensity: "heavy" | "moderate" | "rest" =
+          !w ? "rest" :
+          /(rest|recovery|mobility|deload)/.test(f) ? "rest" :
+          /(heavy|max|strength|leg|squat|deadlift|push|pull)/.test(f) ? "heavy" : "moderate";
+        dayMap.push({ date: ds, weekday: d.toLocaleDateString("en-US", { weekday: "short" }), focus, intensity });
+      }
+      const weightKg = profile.units === "metric" ? Number(profile.weight) : Number(profile.weight) * 0.4536;
+      userPrompt = `Build a 7-day, dietitian-grade, fully periodized meal plan.
+
+CLIENT PROFILE: ${JSON.stringify(profile)}
+BODYWEIGHT_KG: ${isFinite(weightKg) ? weightKg.toFixed(1) : "unknown"}
+NUTRITION PREFERENCES: ${JSON.stringify(np)}
+DAILY MACRO TARGETS: ${JSON.stringify(profile.macro_targets) || "calculate from profile using Mifflin-St Jeor + activity + goal"}
+TRAINING PROGRAM: ${JSON.stringify(program)}
+7-DAY TRAINING SCHEDULE (use these EXACT focuses & intensities to periodize): ${JSON.stringify(dayMap)}
+USER REQUEST: ${userExtraPrompt || "(none)"}
+
+REQUIREMENTS:
+- One day object per entry in the 7-day schedule above (use the SAME weekday and training_focus).
+- calorie_target per day MUST reflect intensity: heavy = +10-20% carbs/calories vs baseline, moderate = baseline, rest = -10-15% carbs.
+- Each day's meal macros MUST sum to within 5% of that day's calorie_target and hit protein ≥ 1.6 g/kg bodyweight.
+- Honor mealsPerDay = ${np.mealsPerDay ?? 3}. Include a peri-workout meal on training days (label slot e.g. "Pre-Workout" or "Post-Workout").
+- ZERO allergens from: ${JSON.stringify(np.allergies ?? [])} ${np.allergiesNotes ? "+ " + np.allergiesNotes : ""}.
+- Diet style: ${JSON.stringify(np.diets ?? [])} — strictly enforce.
+- Ingredients with units in BOTH metric and imperial where sensible (user prefers ${profile.units}).
+- Each meal: realistic title, search_query (concise YouTube query for a meal-prep demo), full macros, ingredient list with weights, numbered instructions, training_rationale (1 sentence linking the meal to that day's session physiology), and a complete meal_prep block (batch_cook, store, reheat, make_ahead, substitutions for the user's allergies, portion_scaling).
+- Provide a categorized weekly shopping_list (Protein, Produce, Grains/Carbs, Dairy/Alt, Pantry/Fats, Other) with consolidated quantities for the week.
+- summary: 2-3 sentence professional overview describing the periodization strategy used.
+
+Return JSON exactly matching: ${SCHEMAS.meal_plan}`;
     } else if (action === "meal_prep") {
-      userPrompt = `Generate a detailed meal-prep guide for this meal: ${userExtraPrompt}\nNutrition prefs: ${JSON.stringify(np)}\nReturn JSON: ${SCHEMAS.meal_prep}`;
+      userPrompt = `Generate a detailed dietitian-grade meal-prep guide for this meal: ${userExtraPrompt}\nNutrition prefs: ${JSON.stringify(np)}\nReturn JSON: ${SCHEMAS.meal_prep}`;
     }
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: action === "meal_plan" ? "google/gemini-2.5-pro" : "google/gemini-2.5-flash",
         messages: [{ role: "system", content: SYS }, { role: "user", content: userPrompt }],
         response_format: { type: "json_object" },
       }),
