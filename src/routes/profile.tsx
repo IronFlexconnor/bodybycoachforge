@@ -12,6 +12,7 @@ import { getStripeEnvironment, PLAN_BY_PRICE } from "@/lib/stripe";
 import { MeasurementSystemPicker } from "@/components/MeasurementSystemPicker";
 import { HeightPicker, ftInToCm, cmToFtIn, formatHeight, type HeightUnit } from "@/components/HeightPicker";
 import { InjuryAssessment, parseInjuries, serializeInjuries } from "@/components/InjuryAssessment";
+import { NutritionPreferencesForm, DEFAULT_NUTRITION } from "@/components/NutritionPreferences";
 import { DEFAULT_UNITS, type Units, displayWeight, unitsToWeightUnit } from "@/lib/units";
 
 export const Route = createFileRoute("/profile")({
