@@ -29,9 +29,10 @@ const TIERS: Record<Tier, {
       "Unlimited AI coach chat",
       "Fully custom adaptive programs",
       "Auto-adjustments after every session",
-      "Full nutrition guidance + meal logging",
+      "5,000+ fresh goal-specific meals",
+      "Senior-safe geriatric programs",
+      "Video form-analysis fixes + feedback",
       "Daily readiness insights",
-      "Complete exercise library",
     ],
   },
   elite: {
