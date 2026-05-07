@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Apple, Loader2, Plus, Sparkles, Trash2, ArrowLeft, Target, ChefHat, ChevronDown, ShoppingCart, BookOpen } from "lucide-react";
+import { Apple, Loader2, Plus, Sparkles, Trash2, ArrowLeft, Target, ChefHat, ChevronDown, ShoppingCart, BookOpen, PlayCircle, RefreshCcw } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,7 +77,7 @@ function Nutrition() {
     } catch { toast.error("Couldn't fetch suggestions"); } finally { setSuggesting(false); }
   };
 
-  const generatePlan = async () => {
+  const generatePlan = async (overridePrompt?: string) => {
     setPlanning(true);
     let activeProfile = profile;
     try {
@@ -95,7 +95,7 @@ function Nutrition() {
         activeProfile = p;
       }
       const { data, error } = await supabase.functions.invoke("nutrition-coach", {
-        body: { action: "meal_plan", prompt: planPrompt || undefined },
+        body: { action: "meal_plan", prompt: overridePrompt || planPrompt || undefined },
       });
       const d: any = data;
       if (d?.error === "limit_reached") {
@@ -108,12 +108,17 @@ function Nutrition() {
         return;
       }
       setPlan(d);
+      if (d?.recommended_macros) setProfile((p: any) => p ? { ...p, macro_targets: d.recommended_macros } : p);
       setOpenDay(0);
-      toast.success(`${d.days.length}-day dietitian plan ready`);
+      toast.success(`${d.days.length}-day macro-matched plan ready`);
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || "Couldn't generate meal plan");
     } finally { setPlanning(false); }
+  };
+
+  const swapMeal = (meal: any) => {
+    generatePlan(`Swap ${meal.title} for a different allergy-safe meal with the same macros and a matching prep video.`);
   };
 
   const reviewDay = async () => {
@@ -266,7 +271,7 @@ function Nutrition() {
             onChange={(e) => setPlanPrompt(e.target.value)}
             className="mb-3 h-11"
           />
-          <Button onClick={generatePlan} disabled={planning} className="h-11 w-full rounded-xl bg-gradient-primary font-semibold text-primary-foreground shadow-glow">
+          <Button onClick={() => generatePlan()} disabled={planning} className="h-11 w-full rounded-xl bg-gradient-primary font-semibold text-primary-foreground shadow-glow">
             {planning ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             {plan ? "Regenerate plan" : "Generate my meal plan"}
           </Button>
@@ -331,7 +336,7 @@ function Nutrition() {
                       {list.map(({ meal, day, di, mi }) => {
                         const k = `lib-${di}-${mi}`;
                         const open = libOpen === k;
-                        const q = encodeURIComponent(meal.search_query || `${meal.title} meal prep recipe`);
+                        const video = meal.prep_video;
                         return (
                           <div key={k} className="rounded-xl border border-border/60 bg-surface p-3">
                             <div className="flex items-start justify-between gap-3">
@@ -340,17 +345,17 @@ function Nutrition() {
                                 <div className="font-semibold leading-tight">{meal.title}</div>
                                 <div className="mt-0.5 text-xs text-muted-foreground">{meal.calories} kcal · {meal.protein_g}P / {meal.carbs_g}C / {meal.fat_g}F</div>
                               </div>
-                              <Button size="sm" onClick={() => addSuggested({ name: meal.slot, title: meal.title, calories: meal.calories, protein_g: meal.protein_g, carbs_g: meal.carbs_g, fat_g: meal.fat_g })} className="rounded-lg bg-gradient-primary text-primary-foreground">Add</Button>
+                              <div className="flex shrink-0 gap-1.5">
+                                <Button size="sm" onClick={() => addSuggested({ name: meal.slot, title: meal.title, calories: meal.calories, protein_g: meal.protein_g, carbs_g: meal.carbs_g, fat_g: meal.fat_g })} className="rounded-lg bg-gradient-primary text-primary-foreground">Add</Button>
+                                <Button size="sm" variant="outline" onClick={() => swapMeal(meal)} disabled={planning} className="rounded-lg border-primary/30 bg-surface text-primary"><RefreshCcw className="h-3.5 w-3.5" /></Button>
+                              </div>
                             </div>
                             <button onClick={() => setLibOpen(open ? null : k)} className="mt-2 text-xs font-semibold text-primary">
                               {open ? "Hide details" : "Recipe & meal prep"}
                             </button>
                             {open && (
                               <div className="mt-2 space-y-2">
-                                <a href={`https://www.youtube.com/results?search_query=${q}`} target="_blank" rel="noreferrer"
-                                  className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1.5 text-[11px] font-semibold text-primary hover:bg-primary/15">
-                                  ▶ Watch meal-prep video
-                                </a>
+                                {video?.url && <MealPrepVideo video={video} title={meal.title} />}
                                 {meal.ingredients_with_units?.length > 0 && (
                                   <div><div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Ingredients</div>
                                     <ul className="mt-1 text-xs text-muted-foreground">{meal.ingredients_with_units.map((ing: string, k2: number) => <li key={k2}>· {ing}</li>)}</ul></div>
@@ -407,19 +412,7 @@ function Nutrition() {
 
                             {meal.training_rationale && <p className="mt-2 text-xs italic text-muted-foreground">{meal.training_rationale}</p>}
 
-                            {(() => {
-                              const q = encodeURIComponent(meal.search_query || `${meal.title} meal prep`);
-                              return (
-                                <a
-                                  href={`https://www.youtube.com/results?search_query=${q}`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1.5 text-[11px] font-semibold text-primary hover:bg-primary/15"
-                                >
-                                  ▶ Watch meal-prep video
-                                </a>
-                              );
-                            })()}
+                            {meal.prep_video?.url && <div className="mt-3"><MealPrepVideo video={meal.prep_video} title={meal.title} /></div>}
 
                             {meal.ingredients_with_units?.length > 0 && (
                               <div className="mt-3">
@@ -524,6 +517,21 @@ function MacroBar({ label, value, target, color }: { label: string; value: numbe
       <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-border/60">
         <div className={`h-full ${color} transition-all`} style={{ width: `${pct}%` }} />
       </div>
+    </div>
+  );
+}
+
+function MealPrepVideo({ video, title }: { video: { url: string; title?: string; duration_seconds?: number; description?: string }; title: string }) {
+  return (
+    <div className="overflow-hidden rounded-xl border border-primary/20 bg-primary/5">
+      <div className="flex items-center justify-between gap-2 border-b border-primary/10 px-3 py-2 text-[11px] font-semibold text-primary">
+        <span className="inline-flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5" /> Meal-making video</span>
+        <span>{video.duration_seconds ?? 9}s</span>
+      </div>
+      <video controls preload="metadata" playsInline className="aspect-video w-full bg-background" aria-label={`${title} meal-making video`}>
+        <source src={video.url} type="video/mp4" />
+      </video>
+      <p className="px-3 py-2 text-[11px] text-muted-foreground">{video.title || video.description || `Short prep demo for ${title}`}</p>
     </div>
   );
 }
