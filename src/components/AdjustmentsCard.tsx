@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { celebrate } from "@/lib/celebrate";
 
 type Adjustment = {
   id: string;
@@ -68,6 +69,7 @@ export function AdjustmentsCard() {
     const tChanges: string[] = d?.training?.changes ?? [];
     const nChanges: string[] = d?.nutrition?.changes ?? [];
     const all = [...tChanges, ...nChanges].slice(0, 4);
+    celebrate();
     toast.success(d.summary ?? "Plan tuned ✨", {
       description: all.length
         ? `Here's what I just tuned for you:\n• ${all.join("\n• ")}`
