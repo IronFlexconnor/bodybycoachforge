@@ -48,6 +48,15 @@ type SubScores = { posture: number; joint_alignment: number; tempo: number; symm
 type JointAngle = { joint: string; phase: string; angle_deg: number; ideal_range: string; verdict: string };
 type TempoBlock = { eccentric_s: number; pause_s: number; concentric_s: number; ideal: string; verdict: string };
 type PlanAdjustment = { type: string; change: string; reason: string; expected_benefit: string };
+type Finding = {
+  title: string;
+  severity: "low" | "moderate" | "high";
+  phase?: string;
+  problem: string;
+  why_it_matters: string;
+  correction_steps: string[];
+  drills: string[];
+};
 type Analysis = {
   exercise_detected?: string;
   confidence?: number;
@@ -61,6 +70,7 @@ type Analysis = {
   compensation_patterns?: string[];
   muscle_activation?: string[];
   good?: string[];
+  findings?: Finding[];
   fixes?: string[];
   cues?: string[];
   next_session_adjustment?: string;
