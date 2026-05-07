@@ -548,6 +548,62 @@ function ResultCard({ result, exercise, onReset, onApplyFix }:
           </Section>
         )}
 
+        {!!a.findings?.length && (
+          <Section title="Deep form breakdown" tone="primary">
+            <div className="space-y-3">
+              {a.findings.map((f, i) => {
+                const sevTone =
+                  f.severity === "high" ? "border-destructive/50 bg-destructive/10 text-destructive"
+                  : f.severity === "moderate" ? "border-warning/50 bg-warning/10 text-warning"
+                  : "border-success/50 bg-success/10 text-success";
+                return (
+                  <div key={i} className="rounded-2xl border border-border/60 bg-surface p-3">
+                    <div className="mb-1.5 flex items-start justify-between gap-2">
+                      <div className="text-sm font-bold leading-snug">{f.title}</div>
+                      <span className={cn("shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider", sevTone)}>
+                        {f.severity}{f.phase ? ` · ${f.phase}` : ""}
+                      </span>
+                    </div>
+                    {f.problem && (
+                      <div className="mb-1.5 text-xs leading-relaxed">
+                        <span className="font-semibold text-foreground/80">What I see: </span>{f.problem}
+                      </div>
+                    )}
+                    {f.why_it_matters && (
+                      <div className="mb-1.5 text-xs leading-relaxed text-muted-foreground">
+                        <span className="font-semibold text-foreground/80">Why it matters: </span>{f.why_it_matters}
+                      </div>
+                    )}
+                    {!!f.correction_steps?.length && (
+                      <div className="mt-2">
+                        <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-primary">Step-by-step fix</div>
+                        <ol className="space-y-1 text-xs">
+                          {f.correction_steps.map((s, j) => (
+                            <li key={j} className="flex gap-2">
+                              <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">{j + 1}</span>
+                              <span>{s}</span>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    )}
+                    {!!f.drills?.length && (
+                      <div className="mt-2">
+                        <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Drills to lock it in</div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {f.drills.map((d, j) => (
+                            <span key={j} className="rounded-lg border border-border bg-background px-2 py-0.5 text-[11px]">{d}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </Section>
+        )}
+
         {(a.symmetry_notes || a.rom_notes) && (
           <Section title="Movement quality">
             {a.symmetry_notes && <div className="text-sm"><span className="font-semibold">Symmetry: </span>{a.symmetry_notes}</div>}
