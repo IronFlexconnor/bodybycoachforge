@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useSubscription } from "@/hooks/useSubscription";
 import { AdjustmentsCard } from "@/components/AdjustmentsCard";
 import { DailyFreshPicks } from "@/components/DailyFreshPicks";
+import { InsightsCarousel } from "@/components/InsightsCarousel";
 import { celebrate } from "@/lib/celebrate";
 
 export const Route = createFileRoute("/")({
