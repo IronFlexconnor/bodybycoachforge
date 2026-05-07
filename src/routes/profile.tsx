@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ChevronRight, Settings, Bell, Heart, Dumbbell, Apple, Shield, LogOut, Sparkles, Loader2, Crown, CreditCard } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
@@ -176,6 +176,15 @@ function Profile() {
         <Section title="Nutrition">
           <Row icon={Apple} label="Diet preference" value={p.diet || "Not set"} />
         </Section>
+
+        <Link to="/body" className="mb-4 flex items-center justify-between rounded-3xl border border-primary/30 bg-gradient-card p-5 shadow-card transition-all hover:border-primary">
+          <div>
+            <div className="text-[10px] uppercase tracking-wider text-primary">New</div>
+            <div className="font-semibold">Body Composition Analysis</div>
+            <div className="text-xs text-muted-foreground">Front · side · rear photos → AI BF%, posture & progress</div>
+          </div>
+          <span className="text-primary text-xl">›</span>
+        </Link>
 
         <Section title="Subscription">
           {isActive && sub ? (

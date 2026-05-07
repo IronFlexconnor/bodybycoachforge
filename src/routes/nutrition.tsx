@@ -300,6 +300,20 @@ function Nutrition() {
 
                             {meal.training_rationale && <p className="mt-2 text-xs italic text-muted-foreground">{meal.training_rationale}</p>}
 
+                            {(() => {
+                              const q = encodeURIComponent(meal.search_query || `${meal.title} meal prep`);
+                              return (
+                                <a
+                                  href={`https://www.youtube.com/results?search_query=${q}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1.5 text-[11px] font-semibold text-primary hover:bg-primary/15"
+                                >
+                                  ▶ Watch meal-prep video
+                                </a>
+                              );
+                            })()}
+
                             {meal.ingredients_with_units?.length > 0 && (
                               <div className="mt-3">
                                 <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Ingredients</div>

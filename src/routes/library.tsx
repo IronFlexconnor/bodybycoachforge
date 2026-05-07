@@ -163,14 +163,29 @@ function ExerciseSheet({ ex, onClose }: { ex: Exercise; onClose: () => void }) {
         </div>
 
         {embed ? (
-          <div className="mb-4 aspect-video overflow-hidden rounded-xl border border-border/60 bg-black">
-            <iframe src={embed} title={ex.name} allow="accelerometer; encrypted-media; picture-in-picture" allowFullScreen className="h-full w-full" />
-          </div>
-        ) : ex.video_url ? (
-          <a href={ex.video_url} target="_blank" rel="noreferrer" className="mb-4 flex items-center gap-2 rounded-xl border border-border/60 bg-surface p-3 text-sm font-medium hover:border-primary/40">
+          <>
+            <div className="mb-2 aspect-video overflow-hidden rounded-xl border border-border/60 bg-black">
+              <iframe src={embed} title={ex.name} allow="accelerometer; encrypted-media; picture-in-picture" allowFullScreen className="h-full w-full" />
+            </div>
+            <a
+              href={`https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name + " proper form demo")}`}
+              target="_blank"
+              rel="noreferrer"
+              className="mb-4 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary"
+            >
+              Video not loading? Find another demo →
+            </a>
+          </>
+        ) : (
+          <a
+            href={`https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name + " proper form demo")}`}
+            target="_blank"
+            rel="noreferrer"
+            className="mb-4 flex items-center gap-2 rounded-xl border border-border/60 bg-surface p-3 text-sm font-medium hover:border-primary/40"
+          >
             <ExternalLink className="h-4 w-4" /> Watch demo
           </a>
-        ) : null}
+        )}
 
         {ex.equipment && ex.equipment.length > 0 && (
           <div className="mb-3">
