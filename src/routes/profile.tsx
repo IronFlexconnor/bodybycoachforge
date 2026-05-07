@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ChevronRight, Settings, Bell, Heart, Dumbbell, Apple, Shield, LogOut, Sparkles, Loader2, Crown, CreditCard } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
