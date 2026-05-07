@@ -317,9 +317,15 @@ export type Database = {
       program_adjustments: {
         Row: {
           changes: Json
+          coach_note: string | null
           created_at: string
           id: string
+          macro_changes: Json
+          meal_changes: Json
           program_id: string | null
+          reviewed_at: string | null
+          scope: string
+          status: string
           summary: string
           trigger: string
           user_id: string
@@ -327,9 +333,15 @@ export type Database = {
         }
         Insert: {
           changes?: Json
+          coach_note?: string | null
           created_at?: string
           id?: string
+          macro_changes?: Json
+          meal_changes?: Json
           program_id?: string | null
+          reviewed_at?: string | null
+          scope?: string
+          status?: string
           summary: string
           trigger: string
           user_id: string
@@ -337,9 +349,15 @@ export type Database = {
         }
         Update: {
           changes?: Json
+          coach_note?: string | null
           created_at?: string
           id?: string
+          macro_changes?: Json
+          meal_changes?: Json
           program_id?: string | null
+          reviewed_at?: string | null
+          scope?: string
+          status?: string
           summary?: string
           trigger?: string
           user_id?: string
