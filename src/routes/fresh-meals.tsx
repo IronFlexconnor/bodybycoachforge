@@ -9,6 +9,7 @@ import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { thumbForRecipe, thumbFallbackForRecipe, videoForRecipe } from "@/lib/mealVideos";
 import { useFavorites } from "@/lib/favorites";
+import { logPlanChangeToCoach } from "@/lib/coachSync";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/fresh-meals")({
