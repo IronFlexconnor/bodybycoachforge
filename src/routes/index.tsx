@@ -256,6 +256,7 @@ function CheckinCard({ onSaved }: { onSaved: (c: any) => void }) {
     }).select().single();
     if (error) { toast.error(error.message); setSaving(false); return; }
     toast.success("Check-in saved — Coach will tune today's session");
+    celebrate();
     onSaved(data);
     // Trigger auto-adjust based on readiness
     supabase.functions.invoke("auto-adjust", { body: { trigger: "checkin", auto_apply: true } })
