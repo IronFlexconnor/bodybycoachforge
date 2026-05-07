@@ -49,7 +49,12 @@ function Nutrition() {
       const { data: m } = await supabase.from("meal_logs").select("*").eq("user_id", user.id).gte("eaten_at", since.toISOString()).order("eaten_at", { ascending: false });
       setMeals((m ?? []) as Meal[]);
       setBusy(false);
+      if (typeof window !== "undefined" && sessionStorage.getItem("forge:autogen-plan") === "1") {
+        sessionStorage.removeItem("forge:autogen-plan");
+        setTimeout(() => generatePlan(), 200);
+      }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loading, navigate]);
 
   const calcMacros = async () => {
