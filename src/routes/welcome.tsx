@@ -152,8 +152,74 @@ function Welcome() {
               </div>
             </div>
           </div>
+          {/* Live app preview — interactive cards mirroring the dashboard */}
+          <div className="mt-6 space-y-3 animate-fade-in">
+            <div className="flex items-center justify-between px-1">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">A peek inside</div>
+              <div className="inline-flex items-center gap-1 text-[11px] text-primary">
+                <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Live
+              </div>
+            </div>
+
+            {/* Today's session preview */}
+            <button
+              onClick={() => navigate({ to: "/auth" })}
+              className="group w-full overflow-hidden rounded-2xl border border-primary/30 bg-gradient-card p-4 text-left shadow-card transition active:scale-[0.99]"
+            >
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  <Dumbbell className="h-3 w-3" /> Today · Push
+                </span>
+                <span className="text-[10px] text-muted-foreground">38 min</span>
+              </div>
+              <div className="mt-2 font-bold leading-tight">Bench · OHP · Incline DB · Triceps</div>
+              <div className="mt-2 flex items-center gap-2 text-[11px] text-muted-foreground">
+                <Flame className="h-3.5 w-3.5 text-primary" /> Auto-tuned to RPE 7 · 4 lifts
+                <span className="ml-auto inline-flex items-center gap-0.5 font-semibold text-primary">
+                  Open <ChevronRight className="h-3.5 w-3.5" />
+                </span>
+              </div>
+            </button>
+
+            {/* Fresh meal preview */}
+            <button
+              onClick={() => navigate({ to: "/auth" })}
+              className="group w-full overflow-hidden rounded-2xl border border-border/60 bg-gradient-card p-4 text-left shadow-card transition active:scale-[0.99]"
+            >
+              <div className="flex items-center gap-3">
+                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-2xl">🍳</div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                      <Play className="h-2.5 w-2.5 fill-current" /> Prep video
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">42g protein</span>
+                  </div>
+                  <div className="mt-1 truncate font-semibold">Honey-Garlic Salmon Bowl</div>
+                  <div className="text-[11px] text-muted-foreground">Fresh today · 18 min</div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </button>
+
+            {/* Insight preview */}
+            <button
+              onClick={() => navigate({ to: "/auth" })}
+              className="group w-full overflow-hidden rounded-2xl border border-border/60 bg-gradient-card p-4 text-left shadow-card transition active:scale-[0.99]"
+            >
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  <TrendingUp className="h-3 w-3" /> Latest insight
+                </span>
+                <span className="text-[10px] text-muted-foreground">2 min read</span>
+              </div>
+              <div className="mt-2 font-semibold leading-snug">Lengthened-bias work grows muscle ~12% faster</div>
+              <p className="mt-1 line-clamp-2 text-[11px] text-muted-foreground">New 2026 meta finds stretch-position reps drive more hypertrophy at matched effort.</p>
+            </button>
+          </div>
+
           {/* Testimonials */}
-          <div className="mt-6 grid grid-cols-1 gap-2.5 animate-fade-in">
+          <div className="mt-5 grid grid-cols-1 gap-2.5 animate-fade-in">
             {[
               { name: "Sarah K.", role: "Lost 18 lbs in 12 weeks", quote: "Feels like having a coach in my pocket. The form feedback is unreal." },
               { name: "Marcus T.", role: "Added 40 lbs to squat", quote: "Plans adapt to me. I've never been this consistent." },
