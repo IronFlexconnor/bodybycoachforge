@@ -134,24 +134,21 @@ function Nutrition() {
     try {
       if (!activeProfile?.macro_targets) {
         toast.loading("Calculating your macro targets…", { id: "macros" });
-        const { data: mData, error: mErr } = await invokeNutritionCoach({ action: "calc_macros" });
+        const nutritionPrefs = activeProfile?.nutrition_preferences ?? {};
+        const mData = calculateMacroTargets(activeProfile ?? {}, nutritionPrefs, null, []);
         toast.dismiss("macros");
-        if (mErr) throw mErr;
         if (isNutritionLimit(mData)) {
           setPaywall({ open: true, reason: (mData as any).message, recommend: "pro" });
           return;
         }
+        if (user) await supabase.from("profiles").update({ macro_targets: mData }).eq("user_id", user.id);
         const { data: p } = await supabase.from("profiles").select("*").eq("user_id", user!.id).maybeSingle();
-        setProfile(p);
-        activeProfile = p;
+        activeProfile = p ?? { ...activeProfile, macro_targets: mData };
+        setProfile(activeProfile);
       }
-      const { data, error } = await invokeNutritionCoach({ action: "meal_plan", prompt: overridePrompt || planPrompt || undefined });
-      const d: any = data;
-      if (isNutritionLimit(d) || ((error as any)?.context?.status === 402)) {
-        setPaywall({ open: true, reason: d?.message || "Personalized meal plans are part of Pro Coach.", recommend: "pro" });
-        return;
-      }
-      if (error) throw error;
+      const nutritionPrefs = activeProfile?.nutrition_preferences ?? {};
+      const targets = activeProfile?.macro_targets ?? calculateMacroTargets(activeProfile ?? {}, nutritionPrefs, null, []);
+      const d: any = buildMealPlan({ profile: { ...activeProfile, macro_targets: targets }, nutritionPrefs, program: null, upcoming: [], prompt: overridePrompt || planPrompt || undefined }, targets);
       if (!d?.days?.length) {
         toast.error("The plan came back incomplete — please try again.");
         return;
