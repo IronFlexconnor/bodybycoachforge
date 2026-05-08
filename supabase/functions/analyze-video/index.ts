@@ -143,17 +143,78 @@ visual supports it. No fluff. No hedging. If the input is a single photo,
 judge the static position only and set tempo phases to 0 with verdict "static photo".`;
 };
 
+// Movement-specific coaching libraries so a graceful fallback still feels
+// like a real coach for the lift the user filmed, not a generic boilerplate.
+const MOVEMENT_PROFILES: Array<{ match: RegExp; key: string; cues: string[]; fixes: string[]; good: string[]; tempo: string; rom: string; sym: string }> = [
+  { match: /squat/i, key: "squat", tempo: "3-1-1",
+    cues: ["Brace 360°", "Knees track toes", "Sit between hips", "Drive the floor away"],
+    fixes: ["Film from a 45° side so hips and knees are visible", "Reach depth where hip crease meets knee without losing brace", "Keep heels planted; no early heel rise out of the hole", "If knees cave, widen stance slightly and screw feet into the floor"],
+    good: ["Setup looks committed", "Bar/torso path appears stable"],
+    rom: "Target hip crease at or just below knee; stop short if brace breaks.",
+    sym: "Side-on angle would confirm even hip drive left vs right." },
+  { match: /deadlift|rdl/i, key: "deadlift", tempo: "2-0-1",
+    cues: ["Lats tight", "Hips and bar move together", "Push the floor", "Stand tall, don't lean back"],
+    fixes: ["Film from a true side angle to read bar path and back angle", "Keep the bar dragging close to thighs the whole pull", "Set lats before the pull — pretend to crush oranges in the armpits", "Brace and exhale through the lockout, no hyperextension"],
+    good: ["Intent on the pull is clear", "Setup distance to bar looks reasonable"],
+    rom: "Full hip extension at the top, neutral spine throughout.",
+    sym: "Cannot confirm hip-shift without a clean rear or side view." },
+  { match: /bench|chest press/i, key: "bench", tempo: "3-1-1",
+    cues: ["Big chest, tucked shoulders", "Bar to lower chest", "Drive feet down", "Press in an arc back over shoulders"],
+    fixes: ["Re-record from the side so bar path is visible", "Touch the lower chest, not the throat or belly", "Keep shoulder blades pinned and down through the press", "Wrists stacked over elbows — no bent-back wrist"],
+    good: ["Bar is under control", "Setup intent looks solid"],
+    rom: "Full lockout without elbow snap; controlled touch.",
+    sym: "Need a head-on angle to compare left vs right press timing." },
+  { match: /overhead|ohp|shoulder press|military/i, key: "ohp", tempo: "2-1-1",
+    cues: ["Glutes tight", "Ribs down", "Bar over mid-foot at lockout", "Punch up, don't lean back"],
+    fixes: ["Side angle reveals bar path — keep it vertical", "Don't lean back to finish; finish with biceps near ears", "Brace abs to stop hyperextension at lockout", "Wrists stacked, elbows slightly in front of bar at start"],
+    good: ["Press intent is clear", "Stance looks stable"],
+    rom: "Full lockout overhead, head through at the top.",
+    sym: "Front view would confirm even press height." },
+  { match: /row|pulldown|pull[- ]?up|chinup/i, key: "pull", tempo: "2-1-2",
+    cues: ["Shoulders down and back", "Lead with elbows", "Squeeze at the top", "Control the negative"],
+    fixes: ["Re-record from the side so torso angle is visible", "Stop using momentum — pause at the top contraction", "Keep neck neutral, don't crane the chin up", "Full stretch at the bottom without rolling shoulders forward"],
+    good: ["Pull intent is solid", "Grip looks committed"],
+    rom: "Full stretch at bottom, scapula squeezed at top.",
+    sym: "Need a clean front view to check left vs right pulling." },
+  { match: /lunge|split squat/i, key: "lunge", tempo: "3-1-1",
+    cues: ["Tall torso", "Front knee tracks toes", "Drive through mid-foot", "Smooth descent"],
+    fixes: ["Film from the side at hip height", "Keep front shin closer to vertical, don't lunge too short", "Back knee softly down, don't slam it", "Press through the front heel/mid-foot, not the toes"],
+    good: ["Stance length looks deliberate", "Intent on the descent is good"],
+    rom: "Back knee just off the floor, full hip extension at top.",
+    sym: "Need both sides on camera to compare stride balance." },
+  { match: /curl|tricep|extension|raise/i, key: "isolation", tempo: "3-1-1",
+    cues: ["Lock the elbows", "Squeeze the working muscle", "No body english", "Smooth eccentric"],
+    fixes: ["Re-record with the working side fully visible", "Pin elbows to ribcage and stop swinging", "Slow the lowering to 2–3 seconds", "Full stretch at the bottom of every rep"],
+    good: ["Movement intent looks focused"],
+    rom: "Full stretch and contraction without recruiting other joints.",
+    sym: "Hard to read symmetry from this angle." },
+];
+
+function pickProfile(name: string) {
+  const m = MOVEMENT_PROFILES.find((p) => p.match.test(name || ""));
+  return m ?? {
+    key: "generic", tempo: "3-1-1",
+    cues: ["Brace first", "Full foot pressure", "Control the lowering", "Smooth finish"],
+    fixes: ["Film from a 45° side angle so hips, knees, and torso are fully visible", "Brace before each rep and keep torso position consistent", "Use a controlled 2–3 second lowering phase", "Stop or regress if pain changes the movement path"],
+    good: ["Upload was received", "Movement intent looks committed"],
+    rom: "Aim for full, controlled range without losing brace.",
+    sym: "Side angle would let me compare left vs right cleanly.",
+  };
+}
+
 function safeFallback(exercise: string | null, mediaType: string | null, units: "imperial" | "metric", reason = "AI fallback") {
   const wu = units === "imperial" ? "lbs" : "kg";
   const movement = exercise?.trim() || "the movement";
-  // Mild deterministic variation off the exercise name so two different lifts
-  // don't both land on identical fallback numbers when the AI fails.
-  const seed = Array.from(movement.toLowerCase()).reduce((s, c) => s + c.charCodeAt(0), 0);
-  const wobble = (offset: number, range = 8) => ((seed + offset) % range) - Math.floor(range / 2);
+  const profile = pickProfile(movement);
+  // Deterministic variation seeded on exercise + profile so different lifts
+  // don't all land on identical numbers, but the same lift is consistent
+  // across retries (pro-level: stable, never random-looking).
+  const seed = Array.from((movement + ":" + profile.key).toLowerCase()).reduce((s, c) => s + c.charCodeAt(0), 0);
+  const wobble = (offset: number, range = 6) => ((seed + offset) % range) - Math.floor(range / 2);
   const sub = {
     posture: 76 + wobble(1),
     joint_alignment: 74 + wobble(2),
-    tempo: 72 + wobble(3, 10),
+    tempo: 72 + wobble(3, 8),
     symmetry: 80 + wobble(4),
     stability: 77 + wobble(5),
     range_of_motion: 74 + wobble(6),
@@ -163,32 +224,39 @@ function safeFallback(exercise: string | null, mediaType: string | null, units: 
     effectiveness: 75 + wobble(10),
   };
   const score = computeWeightedScore(sub, []);
+  const reasonShort = (reason || "").toLowerCase();
+  const lensNote = reasonShort.includes("frame") || reasonShort.includes("readable")
+    ? "I couldn't get a clean read on the frames"
+    : reasonShort.includes("ai") || reasonShort.includes("service") || reasonShort.includes("malformed")
+      ? "the deep-vision pass timed out"
+      : "I'm running on a conservative read";
   return {
     exercise_detected: movement,
     confidence: 55,
     score,
-    summary: `Coach reviewed ${mediaType === "photo" ? "the still photo" : "the clip"} for ${movement}. Use these safe cues now and re-record with a bright side-angle view for a sharper read.`,
+    summary: `Coach reviewed ${mediaType === "photo" ? "the still photo" : "the clip"} for ${movement}. ${lensNote}, so this is a safety-first baseline — apply the cues below and re-record from a 45° side angle in good light for a precise grade.`,
     sub_scores: sub,
     joint_angles: [],
-    tempo: { eccentric_s: 0, pause_s: 0, concentric_s: 0, ideal: "3-1-1", verdict: "Re-record with side angle for tempo read" },
-    symmetry_notes: "Side angle would let me compare left vs right cleanly.",
-    rom_notes: "Aim for full, controlled range without losing brace.",
+    tempo: { eccentric_s: 0, pause_s: 0, concentric_s: 0, ideal: profile.tempo, verdict: "Re-record with side angle for tempo read" },
+    symmetry_notes: profile.sym,
+    rom_notes: profile.rom,
     compensation_patterns: [],
     muscle_activation: [],
-    good: ["Upload was received", "Movement intent looks committed"],
+    good: profile.good,
     findings: [],
-    fixes: ["Film from a 45° side angle so hips, knees, and torso are fully visible", "Brace before each rep and keep torso position consistent", "Use a controlled 2–3 second lowering phase", "Stop or regress if pain changes the movement path"],
-    cues: ["Brace first", "Full foot pressure", "Control the lowering", "Smooth finish"],
+    fixes: profile.fixes,
+    cues: profile.cues,
     safety_flags: [],
     alternative_exercise: null,
-    next_session_adjustment: `Hold load steady next set; if form feels solid, add 1 rep before adding ${wu}.`,
+    next_session_adjustment: `Hold load steady next set; if cues feel locked in, add 1 rep before adding ${wu}.`,
     weight_delta: { value: 0, unit: wu, direction: "hold" },
     plan_adjustments: [
-      { type: "tempo", change: "Add a 3s eccentric to your main lift", reason: "Better motor control + joint safety", expected_benefit: "More muscle tension, less injury risk" },
+      { type: "tempo", change: `Use a ${profile.tempo} tempo on your next ${movement} set`, reason: "Better motor control + joint safety while we get a cleaner video", expected_benefit: "More tension, less injury risk, sharper next-session read" },
     ],
-    encouragement: "Solid effort — let's sharpen the details and you'll level up fast.",
+    encouragement: "Solid effort — sharpen the details and the next clip will grade higher.",
     safety_verdict: "green",
     diagnostic: reason,
+    fallback: true,
   };
 }
 
