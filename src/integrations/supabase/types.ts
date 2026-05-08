@@ -652,6 +652,36 @@ export type Database = {
         }
         Relationships: []
       }
+      usage_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          meta: Json | null
+          ref_id: string | null
+          ref_label: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          meta?: Json | null
+          ref_id?: string | null
+          ref_label?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          meta?: Json | null
+          ref_id?: string | null
+          ref_label?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       video_uploads: {
         Row: {
           analysis: Json | null
@@ -793,7 +823,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      popular_content: {
+        Row: {
+          event_type: string | null
+          last_used: string | null
+          ref_id: string | null
+          ref_label: string | null
+          users: number | null
+          uses: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_active_subscription: {
