@@ -480,6 +480,7 @@ function FreshMealsPage() {
           isFav={isFav(active.id)}
           onSave={(r) => {
             const added = toggle({ id: r.id, slug: r.slug, title: r.title, meal_type: r.meal_type });
+            if (added) trackEvent("meal_save", { ref_id: r.slug, ref_label: r.title });
             toast.success(added ? "Saved to favorites" : "Removed from favorites");
           }}
           onSwap={(r) => { swapIntoPlan(r); setActive(null); }}
