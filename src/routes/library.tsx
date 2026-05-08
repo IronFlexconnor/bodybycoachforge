@@ -31,10 +31,18 @@ type Exercise = {
 
 const CATEGORIES = ["all", "strength", "bodyweight", "core", "mobility", "cardio", "plyo", "power", "recovery"] as const;
 
-function ytEmbed(url: string | null): string | null {
+function ytId(url: string | null): string | null {
   if (!url) return null;
   const m = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);
-  return m ? `https://www.youtube.com/embed/${m[1]}` : null;
+  return m ? m[1] : null;
+}
+function ytEmbed(url: string | null): string | null {
+  const id = ytId(url);
+  return id ? `https://www.youtube.com/embed/${id}` : null;
+}
+function ytThumb(url: string | null): string | null {
+  const id = ytId(url);
+  return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : null;
 }
 
 function Library() {
