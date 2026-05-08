@@ -1,0 +1,1 @@
+ALTER VIEW public.popular_content SET (security_invoker = true);
