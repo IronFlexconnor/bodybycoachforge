@@ -80,6 +80,7 @@ type Analysis = {
   alternative_exercise?: string | null;
   plan_adjustments?: PlanAdjustment[];
   encouragement?: string;
+  safety_verdict?: "green" | "yellow" | "red";
 };
 
 type Upload = {
