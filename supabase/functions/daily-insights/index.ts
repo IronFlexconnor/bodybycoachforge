@@ -77,7 +77,7 @@ function rotate<T>(arr: T[], seed: number, count: number): T[] {
 
 function fallbackCards(today: string) {
   const seed = today.split("-").reduce((a, b) => a + parseInt(b, 10), 0);
-  return rotate(BANK, seed || 1, 6);
+  return rotate(BANK, seed || 1, 7);
 }
 
 Deno.serve(async (req) => {
