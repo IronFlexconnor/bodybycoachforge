@@ -216,8 +216,8 @@ function FormAnalysis() {
       const exs = (w.exercises as any[]) ?? [];
       let didTouch = false;
       const updated = exs.map((ex) => {
-        const name = (ex.name || "").toLowerCase();
-        if (!target || name.includes(target.split(" ")[0]) || target.includes(name.split(" ")[0])) {
+        const name = ex.name || "";
+        if (!target || isSameExercise(name, target)) {
           didTouch = true;
           return { ...ex, notes: [ex.notes, `Coach: ${cueLine}`].filter(Boolean).join(" — ") };
         }
