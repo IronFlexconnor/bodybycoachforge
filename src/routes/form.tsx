@@ -276,12 +276,96 @@ function FormAnalysis() {
     const exName = a.exercise_detected || exercise || "movement";
     const painLabel = pain === "none" ? "no pain" : pain === "some" ? "mild discomfort" : "sharp pain";
     const workedLabel = worked === "yes" ? "correction worked" : worked === "partial" ? "partial improvement" : "didn't help";
-    const summary = `[Form feedback] ${exName} · ${workedLabel} · ${painLabel}${note ? ` — "${note}"` : ""}`;
+
+    // --- Auto-apply training adjustments driven by score + pain feedback ---
+    // Rules (safety-first):
+    //  • sharp pain  → swap to a safer regression + 4-2-3 tempo + −15% load on matching exercises
+    //  • mild pain or low score (<70) → −10% load + 3-1-1 tempo + extra warm-up note
+    //  • didn't help → swap to alternate cue from the analysis
+    //  • worked + score ≥ 85 → small progression nudge (+1 rep target)
+    const score = a.score ?? 0;
+    const alt = a.alternative_exercise?.trim();
+    type Change = { type: string; change: string; reason: string; expected_benefit: string };
+    const autoChanges: Change[] = [];
+    let loadDelta = 0;
+    let tempo: string | null = null;
+    let swapTo: string | null = null;
+
+    if (pain === "sharp") {
+      loadDelta = -15;
+      tempo = "4-2-3";
+      swapTo = alt || null;
+      autoChanges.push(
+        { type: "load", change: `Reduce working weight ~15% on ${exName} this week`, reason: "Sharp pain reported — protect the joint, rebuild pattern", expected_benefit: "Pain-free reps, safer return to load" },
+        { type: "tempo", change: `Slow tempo to 4-2-3 (eccentric-pause-concentric)`, reason: "Higher control = lower joint shear", expected_benefit: "Better motor control, less risk" },
+      );
+      if (swapTo) autoChanges.push({ type: "exercise_swap", change: `Swap ${exName} → ${swapTo} until pain-free`, reason: "Regression keeps stimulus, removes aggravator", expected_benefit: "Train through it without flaring up" });
+    } else if (pain === "some" || score < 70) {
+      loadDelta = -10;
+      tempo = "3-1-1";
+      autoChanges.push(
+        { type: "load", change: `Hold or drop ~10% on ${exName} until form/feel improves`, reason: pain === "some" ? "Mild discomfort reported" : `Score ${score}/100 — clean reps before more load`, expected_benefit: "Locks in technique safely" },
+        { type: "tempo", change: `Use 3-1-1 tempo with intentional brace`, reason: "Slower eccentric exposes weak links", expected_benefit: "Stronger, smoother reps next session" },
+        { type: "mobility", change: "Add 5-min targeted warm-up before this lift", reason: "Prep the joints/tissues that flagged today", expected_benefit: "Easier first set, fewer compensations" },
+      );
+    } else if (worked === "no") {
+      tempo = "3-0-1";
+      autoChanges.push(
+        { type: "accessory", change: `Add 2 sets of an isolation accessory targeting the weak link found in ${exName}`, reason: "Previous cue didn't land — change the lever", expected_benefit: "Reinforce the missing piece directly" },
+        { type: "tempo", change: "Pause-rep variation for 1 working set", reason: "Forces position; bypasses momentum", expected_benefit: "New stimulus for the same fix" },
+      );
+    } else if (worked === "yes" && score >= 85) {
+      autoChanges.push(
+        { type: "reps", change: `Add +1 rep target per working set on ${exName}`, reason: "Form is dialed — earn progression", expected_benefit: "Steady overload without risk" },
+      );
+    }
+
+    // Apply the autoChanges to upcoming matching workouts (notes + structured edits)
+    const today = new Date().toISOString().slice(0, 10);
+    const target = (exName).toLowerCase();
+    const cueLine = autoChanges.map((c) => `${c.type}: ${c.change}`).join(" — ");
+    const touched: { date: string; title: string }[] = [];
+    const previousByWorkout: Record<string, any[]> = {};
+    if (autoChanges.length) {
+      const { data: workouts } = await supabase
+        .from("workouts")
+        .select("id, title, exercises, scheduled_date")
+        .eq("user_id", user.id).gte("scheduled_date", today).neq("status", "completed")
+        .order("scheduled_date").limit(7);
+      for (const w of (workouts ?? [])) {
+        const exs = (w.exercises as any[]) ?? [];
+        let didTouch = false;
+        const updated = exs.map((ex) => {
+          const name = (ex.name || "").toLowerCase();
+          const matches = !!target && (name.includes(target.split(" ")[0]) || target.includes(name.split(" ")[0]));
+          if (!matches) return ex;
+          didTouch = true;
+          const next: any = { ...ex };
+          if (swapTo) next.name = swapTo;
+          if (tempo) next.tempo = tempo;
+          if (loadDelta && typeof next.weight === "number") {
+            next.weight = Math.max(0, Math.round(next.weight * (1 + loadDelta / 100) * 2) / 2);
+          }
+          next.notes = [next.notes, `Coach (auto from form feedback): ${cueLine}`].filter(Boolean).join(" — ");
+          return next;
+        });
+        if (didTouch) {
+          previousByWorkout[w.id] = exs;
+          await supabase.from("workouts").update({ exercises: updated }).eq("id", w.id);
+          touched.push({ date: w.scheduled_date as string, title: (w as any).title || "Workout" });
+        }
+      }
+    }
+
+    const summary = touched.length
+      ? `[Form feedback] ${exName} · ${workedLabel} · ${painLabel} → auto-applied ${autoChanges.length} change(s) to ${touched.length} upcoming workout${touched.length === 1 ? "" : "s"}.`
+      : `[Form feedback] ${exName} · ${workedLabel} · ${painLabel}${note ? ` — "${note}"` : ""}`;
+
     try {
       await supabase.from("chat_messages").insert({
         user_id: user.id,
         role: "user",
-        content: `${summary}\nUse this signal to refine future form analysis and training adjustments. If pain was reported, prioritize safer regressions and recheck mechanics next session.`,
+        content: `${summary}\nUse this signal to refine future form analysis and training adjustments.${pain !== "none" ? " Pain reported — prioritize safer regressions and recheck mechanics next session." : ""}`,
       });
     } catch {}
     try {
@@ -291,20 +375,30 @@ function FormAnalysis() {
         scope: "training",
         status: "approved",
         summary,
-        changes: [{
-          exercise: exName,
-          upload_id: result.id ?? null,
-          worked, pain, note: note || null,
-          prior_score: a.score ?? null,
-        }],
-        coach_note: pain !== "none" ? "User reported pain — bias toward regression and ROM/tempo safety on next analysis." : null,
+        changes: [
+          { exercise: exName, upload_id: result.id ?? null, worked, pain, note: note || null, prior_score: a.score ?? null },
+          ...autoChanges,
+        ] as any,
+        previous_state: previousByWorkout as any,
+        coach_note: pain === "sharp"
+          ? "Sharp pain — auto-deloaded and slowed tempo; swap to regression until pain-free."
+          : pain === "some"
+          ? "Mild discomfort — held load and added warm-up; recheck mechanics next session."
+          : worked === "no"
+          ? "Cue didn't land — switched lever to accessory + pause work."
+          : worked === "yes" && score >= 85
+          ? "Form locked in — earned a small progression."
+          : null,
       });
     } catch {}
+
     setFeedback({ uploadId: result.id, submitted: true });
-    if (pain === "sharp") toast.warning("Logged. Coach will prioritize safer variations next session.");
+    if (pain === "sharp") toast.warning(`Auto-applied safer plan on ${touched.length || 0} upcoming workout${touched.length === 1 ? "" : "s"}.`);
+    else if (touched.length) toast.success(`Auto-applied ${autoChanges.length} change(s) to ${touched.length} workout${touched.length === 1 ? "" : "s"}.`);
     else if (worked === "yes") toast.success("Nice — Coach will keep this dialed in.");
     else toast.success("Got it — Coach will adjust next analysis.");
   };
+
 
   return (
     <AppShell>
