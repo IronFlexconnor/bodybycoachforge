@@ -386,7 +386,7 @@ function FormAnalysis() {
           <ResultCard
             result={result}
             exercise={exercise}
-            onReset={() => { setResult(null); setExercise(""); setChangeSummary(""); }}
+            onReset={() => { setResult(null); setExercise(""); setChangeSummary(""); setFeedback({ submitted: false }); }}
             onApplyFix={applyFix}
           />
         )}
