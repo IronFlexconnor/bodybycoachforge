@@ -56,6 +56,11 @@ export function MealPrepVideo({
   const maxThumb = `https://i.ytimg.com/vi/${video.id}/maxresdefault.jpg`;
   const hqThumb = `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
 
+  // Prefetch the *next* curated clip's thumbnail so a Regenerate tap feels instant.
+  const nextVideo = nextVideoForRecipe(recipe, offset);
+  const nextMaxThumb = `https://i.ytimg.com/vi/${nextVideo.id}/maxresdefault.jpg`;
+  const nextHqThumb = `https://i.ytimg.com/vi/${nextVideo.id}/hqdefault.jpg`;
+
   useEffect(() => {
     setImgReady(false);
     setUsedFallback(false);
@@ -209,6 +214,22 @@ export function MealPrepVideo({
               </div>
             </div>
           </button>
+        )}
+
+        {/* Prefetch next clip's thumbnail (hidden) once the card is in view */}
+        {inView && (
+          <img
+            src={nextMaxThumb}
+            srcSet={`${nextMaxThumb} 1280w, ${nextHqThumb} 480w`}
+            alt=""
+            aria-hidden
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
+            width={1}
+            height={1}
+            className="pointer-events-none absolute h-px w-px opacity-0"
+          />
         )}
 
         {/* Regenerating overlay — single lightweight animated layer */}
