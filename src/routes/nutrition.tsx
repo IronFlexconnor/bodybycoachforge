@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { buildMealPlan, calculateMacroTargets, reviewLoggedMeals } from "../../supabase/functions/nutrition-coach/planner";
 import { MealRegenerationModal } from "@/components/MealRegenerationModal";
-import { videoForRecipe } from "@/lib/mealVideos";
+import { MealPrepVideo } from "@/components/MealPrepVideo";
 
 export const Route = createFileRoute("/nutrition")({
   head: () => ({ meta: [{ title: "Nutrition — Body Forge" }] }),
@@ -497,7 +497,7 @@ function Nutrition() {
                             </button>
                             {open && (
                               <div className="mt-2 space-y-2">
-                                {video?.url && <MealPrepVideo video={video} title={meal.title} />}
+                                {video?.url && <MealPrepVideo recipe={{ slug: meal.title, title: meal.title, meal_type: meal.slot }} title={meal.title} categoryLabel={meal.slot} />}
                                 {meal.ingredients_with_units?.length > 0 && (
                                   <div><div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Ingredients</div>
                                     <ul className="mt-1 text-xs text-muted-foreground">{meal.ingredients_with_units.map((ing: string, k2: number) => <li key={k2}>· {ing}</li>)}</ul></div>
@@ -554,7 +554,7 @@ function Nutrition() {
 
                             {meal.training_rationale && <p className="mt-2 text-xs italic text-muted-foreground">{meal.training_rationale}</p>}
 
-                            {meal.prep_video?.url && <div className="mt-3"><MealPrepVideo video={meal.prep_video} title={meal.title} /></div>}
+                            {meal.prep_video?.url && <div className="mt-3"><MealPrepVideo recipe={{ slug: meal.title, title: meal.title, meal_type: meal.slot }} title={meal.title} categoryLabel={meal.slot} /></div>}
 
                             {meal.ingredients_with_units?.length > 0 && (
                               <div className="mt-3">
@@ -673,39 +673,4 @@ function MacroBar({ label, value, target, color, unit = "g" }: { label: string; 
   );
 }
 
-function MealPrepVideo({ video, title }: { video: { url?: string; title?: string; duration_seconds?: number; description?: string }; title: string }) {
-  const [playing, setPlaying] = useState(false);
-  const yt = videoForRecipe({ slug: title, title });
-  const thumb = `https://img.youtube.com/vi/${yt.id}/hqdefault.jpg`;
-  return (
-    <div className="overflow-hidden rounded-xl border border-primary/20 bg-primary/5">
-      <div className="flex items-center justify-between gap-2 border-b border-primary/10 px-3 py-2 text-[11px] font-semibold text-primary">
-        <span className="inline-flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5" /> Meal-prep video</span>
-        <a href={yt.watchUrl} target="_blank" rel="noreferrer" className="underline">Watch full</a>
-      </div>
-      <div className="relative aspect-video w-full bg-black">
-        {playing ? (
-          <iframe
-            src={`${yt.embedUrl}&autoplay=1`}
-            title={`${title} prep video`}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="absolute inset-0 h-full w-full"
-          />
-        ) : (
-          <button onClick={() => setPlaying(true)} className="group absolute inset-0 h-full w-full">
-            <img src={thumb} alt={`${title} prep video thumbnail`} className="h-full w-full object-cover" loading="lazy" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <div className="absolute inset-0 grid place-items-center">
-              <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/90 text-primary-foreground shadow-glow transition-transform group-hover:scale-110">
-                <PlayCircle className="h-6 w-6" />
-              </div>
-            </div>
-            <div className="absolute bottom-2 left-3 right-3 text-left text-xs font-semibold text-white drop-shadow">{title}</div>
-          </button>
-        )}
-      </div>
-      <p className="px-3 py-2 text-[11px] text-muted-foreground">Tap to autoplay · short prep demo for {title}</p>
-    </div>
-  );
-}
+// MealPrepVideo moved to src/components/MealPrepVideo.tsx
