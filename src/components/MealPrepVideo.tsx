@@ -216,6 +216,22 @@ export function MealPrepVideo({
           </button>
         )}
 
+        {/* Prefetch next clip's thumbnail (hidden) once the card is in view */}
+        {inView && (
+          <img
+            src={nextMaxThumb}
+            srcSet={`${nextMaxThumb} 1280w, ${nextHqThumb} 480w`}
+            alt=""
+            aria-hidden
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
+            width={1}
+            height={1}
+            className="pointer-events-none absolute h-px w-px opacity-0"
+          />
+        )}
+
         {/* Regenerating overlay — single lightweight animated layer */}
         {regenerating && (
           <div className="absolute inset-0 grid place-items-center bg-black/55">
