@@ -240,53 +240,25 @@ export function MealRegenerationModal({
 }
 
 function RecipeCard({ recipe, index, swapping, onSwap }: { recipe: Recipe; index: number; swapping: boolean; onSwap: () => void }) {
-  const [showVideo, setShowVideo] = useState(false);
-  const video = videoForRecipe({
-    slug: recipe.slug,
-    title: recipe.title,
-    meal_type: recipe.meal_type,
-    dietary_tags: recipe.dietary_tags,
-    cuisine: recipe.cuisine,
-  });
-  const thumb = thumbForRecipe({
-    slug: recipe.slug,
-    title: recipe.title,
-    meal_type: recipe.meal_type,
-    dietary_tags: recipe.dietary_tags,
-    cuisine: recipe.cuisine,
-  });
-
   return (
     <div
       className="overflow-hidden rounded-3xl border border-border/60 bg-gradient-card shadow-card animate-fade-in"
       style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
     >
-      <div className="relative aspect-video w-full bg-black">
-        {showVideo ? (
-          <iframe
-            src={`${video.embedUrl}&autoplay=1`}
-            title={`${recipe.title} prep video`}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            loading="lazy"
-            className="absolute inset-0 h-full w-full"
-          />
-        ) : (
-          <button onClick={() => setShowVideo(true)} className="group absolute inset-0 h-full w-full">
-            <img src={thumb} alt={recipe.title} className="h-full w-full object-cover" loading="lazy" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <div className="absolute inset-0 grid place-items-center">
-              <div className="grid h-14 w-14 place-items-center rounded-full bg-primary/90 text-primary-foreground shadow-glow transition-transform group-hover:scale-110">
-                <PlayCircle className="h-7 w-7" />
-              </div>
-            </div>
-            <div className="absolute bottom-2 left-3 right-3 text-left">
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-white/80">{recipe.meal_type}</div>
-              <div className="text-sm font-bold text-white drop-shadow">{recipe.title}</div>
-            </div>
-          </button>
-        )}
-      </div>
+      <MealPrepVideo
+        recipe={{
+          slug: recipe.slug,
+          title: recipe.title,
+          meal_type: recipe.meal_type,
+          dietary_tags: recipe.dietary_tags,
+          cuisine: recipe.cuisine,
+        }}
+        title={recipe.title}
+        size="lg"
+        priority={index < 2}
+        categoryLabel={recipe.meal_type}
+        durationLabel={`${recipe.prep_minutes + recipe.cook_minutes} min`}
+      />
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
@@ -309,11 +281,6 @@ function RecipeCard({ recipe, index, swapping, onSwap }: { recipe: Recipe; index
             {swapping ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Check className="mr-1 h-3.5 w-3.5" /> Swap in</>}
           </Button>
         </div>
-        {!showVideo && (
-          <button onClick={() => setShowVideo(true)} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">
-            <PlayCircle className="h-3.5 w-3.5" /> Watch full prep
-          </button>
-        )}
       </div>
     </div>
   );
