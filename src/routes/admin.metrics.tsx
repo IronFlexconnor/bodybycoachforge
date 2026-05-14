@@ -252,6 +252,59 @@ function MetricsDashboard() {
               ))}
             </div>
 
+            {/* AI first-token reconciliation */}
+            <Card className="p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-sm font-semibold">AI first-token reconciliation (p50)</h2>
+                <Badge variant="secondary" className="text-[10px]">n={reconciliation.n}</Badge>
+              </div>
+              {reconciliation.n === 0 ? (
+                <p className="text-xs text-muted-foreground">No AI samples yet — send a chat message to populate.</p>
+              ) : (
+                <>
+                  <div className="grid gap-3 sm:grid-cols-4">
+                    <div className="rounded-md border border-border/40 p-3">
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Client perceived</div>
+                      <div className="mt-1 text-lg font-semibold">{fmtMs(reconciliation.cft)}</div>
+                    </div>
+                    <div className="rounded-md border border-border/40 p-3">
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Server processing</div>
+                      <div className="mt-1 text-lg font-semibold text-amber-500">{fmtMs(reconciliation.srv)}</div>
+                    </div>
+                    <div className="rounded-md border border-border/40 p-3">
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Network overhead</div>
+                      <div className="mt-1 text-lg font-semibold text-sky-500">{fmtMs(reconciliation.net)}</div>
+                    </div>
+                    <div className="rounded-md border border-border/40 p-3">
+                      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Server + Network</div>
+                      <div className="mt-1 text-lg font-semibold">{fmtMs(reconciliation.sum)}</div>
+                      <div className={`mt-1 text-[10px] ${Math.abs(reconciliation.drift) <= 2 ? "text-emerald-500" : "text-amber-500"}`}>
+                        {reconciliation.drift >= 0 ? "+" : ""}{reconciliation.drift}% drift vs client
+                      </div>
+                    </div>
+                  </div>
+                  {/* Visual breakdown bar */}
+                  <div className="mt-4">
+                    <div className="flex h-3 w-full overflow-hidden rounded-full bg-muted">
+                      {reconciliation.cft > 0 && (
+                        <>
+                          <div className="bg-amber-500" style={{ width: `${Math.min(100, (reconciliation.srv / reconciliation.cft) * 100)}%` }} />
+                          <div className="bg-sky-500" style={{ width: `${Math.min(100, (reconciliation.net / reconciliation.cft) * 100)}%` }} />
+                        </>
+                      )}
+                    </div>
+                    <div className="mt-2 flex gap-4 text-[10px] text-muted-foreground">
+                      <span className="flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-sm bg-amber-500" /> Server (Gemini + context)</span>
+                      <span className="flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-sm bg-sky-500" /> Network (RTT + parse)</span>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-[11px] text-muted-foreground">
+                    Server timestamps are taken inside the edge function (handler entry → first content delta from Gemini). Network overhead is the residual after subtracting server processing from the client-perceived first-token time. Drift &lt;5% means clocks and instrumentation are reconciled correctly.
+                  </p>
+                </>
+              )}
+            </Card>
+
             {/* Trend chart */}
             <Card className="p-4">
               <h2 className="mb-3 text-sm font-semibold">Daily p95 trend</h2>
