@@ -104,6 +104,8 @@ function Chat() {
 
     try {
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-coach`;
+      const t0 = performance.now();
+      let firstTokenAt = 0;
       const resp = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
