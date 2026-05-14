@@ -148,6 +148,23 @@ function Chat() {
           if (json === "[DONE]") { done = true; break; }
           try {
             const parsed = JSON.parse(json);
+            // Server-side timing markers (custom, non-OpenAI)
+            if (parsed.type === "timing") {
+              if (typeof parsed.server_received_at === "number") {
+                (window as any).__forge_srv_recv = parsed.server_received_at;
+              }
+              if (typeof parsed.server_first_token_at === "number" && firstTokenAt) {
+                const srvRecv = (window as any).__forge_srv_recv as number | undefined;
+                const serverProcessing = srvRecv ? parsed.server_first_token_at - srvRecv : 0;
+                const clientFirstToken = firstTokenAt - t0;
+                const networkOverhead = Math.max(0, clientFirstToken - serverProcessing);
+                import("@/lib/perf").then(({ recordPerf }) => {
+                  if (serverProcessing > 0) recordPerf({ event_type: "ai_server_processing", value_ms: serverProcessing, route: "/chat" });
+                  recordPerf({ event_type: "ai_network_overhead", value_ms: networkOverhead, route: "/chat", meta: { client_first_token: Math.round(clientFirstToken), server_processing: Math.round(serverProcessing) } });
+                });
+              }
+              continue;
+            }
             const c = parsed.choices?.[0]?.delta?.content;
             if (c) {
               if (!firstTokenAt) {
