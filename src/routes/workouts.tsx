@@ -229,9 +229,16 @@ function ActiveSession({ workout, onClose, onComplete }: { workout: Workout; onC
         {workout.exercises.map((ex) => (
           <div key={ex.name} className="rounded-2xl border border-border/60 bg-gradient-card p-4 shadow-card">
             <div className="mb-3 flex items-baseline justify-between">
-              <div>
-                <div className="font-semibold">{ex.name}</div>
+              <div className="min-w-0">
+                <div className="font-semibold truncate">{ex.name}</div>
                 <div className="text-xs text-muted-foreground">Target: {ex.sets} × {ex.reps}{ex.rpe ? ` · RPE ${ex.rpe}` : ""}</div>
+                {lastByExercise[ex.name] ? (
+                  <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                    Last: {lastByExercise[ex.name]!.weight}{lastByExercise[ex.name]!.unit ?? weightUnit} × {lastByExercise[ex.name]!.reps ?? "—"}
+                  </div>
+                ) : (
+                  <div className="mt-1 text-[10px] text-muted-foreground">First time logging — set your baseline 💪</div>
+                )}
               </div>
               <button onClick={() => analyzeExercise(ex.name)} className="ml-3 grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary/30 bg-primary/10 text-primary transition-colors hover:border-primary" aria-label={`Analyze ${ex.name} form`}>
                 <Video className="h-4 w-4" />
