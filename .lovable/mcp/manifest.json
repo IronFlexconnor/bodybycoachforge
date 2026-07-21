@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://zopnqjiyjgrzizulsqof.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "body-forge-mcp",
+      "version": "0.1.0",
+      "title": "Body Forge Coach"
+    },
+    "tools": [
+      {
+        "name": "get_profile",
+        "title": "Get my profile",
+        "description": "Fetch the signed-in user's coaching profile (goals, injuries, nutrition preferences, measurements).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_active_program",
+        "title": "Get active training program",
+        "description": "Return the signed-in user's currently active training program with upcoming workouts.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_recent_workouts",
+        "title": "List recent completed workouts",
+        "description": "Return the user's most recent completed workouts with every logged set (weight, reps, RPE).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "How many recent workouts to return (default 5).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_meals_today",
+        "title": "List today's meals",
+        "description": "Return every meal the signed-in user has logged since midnight local server time, with macros.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "log_meal",
+        "title": "Log a meal",
+        "description": "Insert a meal into the signed-in user's food log with macros.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Meal name, e.g. 'Chicken rice bowl'."
+            },
+            "calories": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Total kcal."
+            },
+            "protein_g": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Protein in grams."
+            },
+            "carbs_g": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Carbs in grams."
+            },
+            "fat_g": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Fat in grams."
+            },
+            "eaten_at": {
+              "description": "ISO timestamp; defaults to now.",
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+            }
+          },
+          "required": [
+            "name",
+            "calories",
+            "protein_g",
+            "carbs_g",
+            "fat_g"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
