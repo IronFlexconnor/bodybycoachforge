@@ -40,53 +40,56 @@
 }
 
 :root {
-  --radius: 1rem;
+  --radius: 1.1rem;
 
-  /* IronFlex Fitness — clean white base, deep navy text, vibrant teal accent */
+  /* IronFlex Fitness — clean white base, deep navy structure, vibrant teal hero accent */
   --background: oklch(1 0 0);
-  --foreground: oklch(0.22 0.04 245);
+  --foreground: oklch(0.18 0.045 250);
 
-  /* Supporting surfaces: light gray + soft dark navy for contrast cards */
-  --surface: oklch(0.97 0.006 240);
-  --surface-elevated: oklch(0.22 0.04 245);
+  /* Surfaces: crisp white cards + soft cool-gray canvas */
+  --surface: oklch(0.975 0.006 230);
+  --surface-elevated: oklch(0.16 0.045 250);
 
-  --card: oklch(0.98 0.005 240);
-  --card-foreground: oklch(0.22 0.04 245);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.045 250);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.04 245);
+  --popover-foreground: oklch(0.18 0.045 250);
 
-  /* Vibrant teal — primary CTA / accent (darkened for WCAG AA on white) */
-  --primary: oklch(0.5 0.11 200);
+  /* Vibrant teal — hero CTA. Darker shade tuned for AA on white; brighter glow for gradients */
+  --primary: oklch(0.58 0.145 195);
   --primary-foreground: oklch(1 0 0);
-  --primary-glow: oklch(0.78 0.13 195);
+  --primary-glow: oklch(0.82 0.16 190);
 
-  /* Deep navy — strong text, headings, dark surfaces */
-  --secondary: oklch(0.22 0.04 245);
+  /* Deep navy — headings, dark hero surfaces */
+  --secondary: oklch(0.18 0.045 250);
   --secondary-foreground: oklch(1 0 0);
 
-  --muted: oklch(0.96 0.005 240);
-  --muted-foreground: oklch(0.42 0.015 245);
+  --muted: oklch(0.965 0.006 230);
+  --muted-foreground: oklch(0.42 0.02 245);
 
-  --accent: oklch(0.5 0.11 200);
+  --accent: oklch(0.58 0.145 195);
   --accent-foreground: oklch(1 0 0);
 
-  --destructive: oklch(0.55 0.22 25);
+  --destructive: oklch(0.58 0.22 25);
   --destructive-foreground: oklch(1 0 0);
 
-  --success: oklch(0.5 0.11 200);
-  --warning: oklch(0.55 0.16 65);
+  --success: oklch(0.58 0.145 195);
+  --warning: oklch(0.72 0.17 70);
 
-  --border: oklch(0.88 0.008 240);
-  --input: oklch(0.94 0.006 240);
-  --ring: oklch(0.5 0.11 200);
+  --border: oklch(0.9 0.008 235);
+  --input: oklch(0.955 0.006 230);
+  --ring: oklch(0.58 0.145 195);
 
-  --gradient-primary: linear-gradient(135deg, oklch(0.5 0.11 200), oklch(0.46 0.11 210));
-  --gradient-hero: linear-gradient(160deg, oklch(0.22 0.04 245) 0%, oklch(0.28 0.06 220) 55%, oklch(0.42 0.11 195) 100%);
-  --gradient-card: linear-gradient(145deg, oklch(0.99 0.004 240), oklch(0.96 0.006 240));
-  --shadow-glow: 0 10px 40px -10px oklch(0.5 0.11 200 / 45%);
-  --shadow-card: 0 4px 24px -10px oklch(0.22 0.04 245 / 18%);
+  --gradient-primary: linear-gradient(135deg, oklch(0.7 0.16 190) 0%, oklch(0.52 0.14 205) 100%);
+  --gradient-hero: linear-gradient(160deg, oklch(0.16 0.045 250) 0%, oklch(0.22 0.06 230) 45%, oklch(0.48 0.15 195) 100%);
+  --gradient-card: linear-gradient(145deg, oklch(1 0 0), oklch(0.965 0.006 230));
+  --gradient-accent: linear-gradient(135deg, oklch(0.82 0.16 190), oklch(0.58 0.145 195));
+  --shadow-glow: 0 14px 44px -12px oklch(0.62 0.16 195 / 55%);
+  --shadow-card: 0 6px 28px -14px oklch(0.18 0.045 250 / 22%);
+  --shadow-elevated: 0 20px 60px -24px oklch(0.18 0.045 250 / 30%);
 }
+
 
 .dark {
   /* Optional dark mode retains navy base */
@@ -132,12 +135,18 @@
   .bg-gradient-primary { background: var(--gradient-primary); }
   .bg-gradient-hero { background: var(--gradient-hero); }
   .bg-gradient-card { background: var(--gradient-card); }
+  .bg-gradient-accent { background: var(--gradient-accent); }
   .shadow-glow { box-shadow: var(--shadow-glow); }
   .shadow-card { box-shadow: var(--shadow-card); }
+  .shadow-elevated { box-shadow: var(--shadow-elevated); }
   .text-gradient-primary {
     background: var(--gradient-primary);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
+  .ring-glow {
+    box-shadow: 0 0 0 1px oklch(0.58 0.145 195 / 25%), 0 10px 30px -12px oklch(0.58 0.145 195 / 45%);
+  }
 }
+
