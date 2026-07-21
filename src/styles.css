@@ -211,6 +211,13 @@
     color: transparent;
     text-wrap: balance;
   }
+  :is(.dark) .page-title {
+    /* Lift middle stop so gradient text stays AA-large on dark navy bg */
+    background: linear-gradient(135deg, var(--color-foreground) 0%, oklch(0.86 0.08 200) 55%, var(--color-primary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
   .section-title {
     font-family: var(--font-display);
     font-weight: 800;
