@@ -72,6 +72,7 @@ function Welcome() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const parallaxRef = useHeroParallax();
 
   if (showOnboarding) {
     const slide = SLIDES[step];
