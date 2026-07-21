@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Play, Sparkles, ChevronRight, Loader2, Heart } from "lucide-react";
+import { Play, Sparkles, ChevronRight, Loader2, Heart, RefreshCcw, CalendarClock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { thumbForRecipe, thumbFallbackForRecipe } from "@/lib/mealVideos";
 import { useFavorites } from "@/lib/favorites";
+import { weekKey, nextRefreshLabel } from "@/lib/weekRefresh";
 import { toast } from "sonner";
 
 type Recipe = {
@@ -16,17 +17,6 @@ type Recipe = {
   dietary_tags: string[] | null;
   cuisine: string | null;
 };
-
-// Stable week key (Monday-anchored ISO date), e.g. "2026-05-04".
-// Rotating on a week — not a day — keeps meal variety consistent long enough
-// for users to actually try recipes but still refreshes every Monday.
-function weekKey() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  const dayNum = (d.getDay() + 6) % 7; // Monday = 0
-  d.setDate(d.getDate() - dayNum);
-  return d.toISOString().slice(0, 10);
-}
 
 // Hash a string into 32-bit int
 function hash(s: string) {
@@ -53,55 +43,81 @@ function seededShuffle<T>(arr: T[], seed: number): T[] {
 export function DailyFreshPicks() {
   const navigate = useNavigate();
   const [items, setItems] = useState<Recipe[] | null>(null);
+  const [refreshNonce, setRefreshNonce] = useState(0);
+  const [refreshLabel, setRefreshLabel] = useState(nextRefreshLabel());
   const { isFav, toggle } = useFavorites();
+
+  // Keep the "next refresh" countdown honest across day changes without a reload.
+  useEffect(() => {
+    const t = setInterval(() => setRefreshLabel(nextRefreshLabel()), 60 * 60 * 1000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const date = weekKey();
-      // Cache per-week in sessionStorage so the carousel feels instant on revisit
-      const cacheKey = `forge:fresh-meals:week:${date}`;
+      const manualKey = `forge:fresh-meals:manual:${date}`;
+      const manualOffset = (() => {
+        try { return Number(sessionStorage.getItem(manualKey) || 0) + refreshNonce; } catch { return refreshNonce; }
+      })();
+      const cacheKey = `forge:fresh-meals:week:${date}:${manualOffset}`;
       try {
         const cached = sessionStorage.getItem(cacheKey);
-        if (cached) {
-          setItems(JSON.parse(cached));
-          return;
-        }
+        if (cached) { setItems(JSON.parse(cached)); return; }
       } catch {}
 
-      // Pull a wide window of recipes, then deterministically shuffle by week so
-      // all users see the same fresh set this week and a new set next Monday —
-      // without ever repeating the previous week's picks.
       const { data } = await supabase
         .from("recipes")
         .select("id,slug,title,meal_type,calories,protein_g,dietary_tags,cuisine")
         .limit(300);
       if (cancelled || !data) return;
 
-      const seed = hash(date);
+      const seed = hash(`${date}:${manualOffset}`);
       const shuffled = seededShuffle(data as Recipe[], seed).slice(0, 12);
       try { sessionStorage.setItem(cacheKey, JSON.stringify(shuffled)); } catch {}
       setItems(shuffled);
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [refreshNonce]);
 
-  const open = () => {
-    navigate({ to: "/fresh-meals" });
+  const open = () => { navigate({ to: "/fresh-meals" }); };
+
+  const getNewMeals = () => {
+    const date = weekKey();
+    try {
+      const cur = Number(sessionStorage.getItem(`forge:fresh-meals:manual:${date}`) || 0);
+      sessionStorage.setItem(`forge:fresh-meals:manual:${date}`, String(cur + 1));
+    } catch {}
+    setItems(null);
+    setRefreshNonce((n) => n + 1);
+    toast.success("Fresh batch served — next auto-refresh still lands Monday");
   };
 
   return (
     <div className="mb-6">
-      <div className="mb-3 flex items-end justify-between">
-        <div>
+      <div className="mb-3 flex items-end justify-between gap-3">
+        <div className="min-w-0">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
             <Sparkles className="h-3 w-3" /> Fresh this week
           </div>
           <h3 className="mt-1.5 text-lg font-semibold leading-tight">This Week's Fresh Meals</h3>
+          <div className="mt-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+            <CalendarClock className="h-3 w-3" /> {refreshLabel}
+          </div>
         </div>
-        <button onClick={open} className="flex shrink-0 items-center gap-0.5 text-sm font-medium text-primary">
-          See all <ChevronRight className="h-4 w-4" />
-        </button>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <button
+            onClick={getNewMeals}
+            aria-label="Get new meals now"
+            className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary hover:bg-primary/20 transition"
+          >
+            <RefreshCcw className="h-3 w-3" /> Get new meals
+          </button>
+          <button onClick={open} className="flex items-center gap-0.5 text-sm font-medium text-primary">
+            See all <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
       <div className="-mx-5 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {!items ? (

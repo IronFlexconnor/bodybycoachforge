@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft, Search, Sparkles, Heart, Play, Loader2, RefreshCcw, Shuffle,
   Clock, Flame, Leaf, Utensils, Plus, X, Sunrise, Sun, Moon, Coffee, Cookie, Apple,
-  ShoppingCart, Copy, Check, Wand2,
+  ShoppingCart, Copy, Check, Wand2, CalendarClock,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import { thumbForRecipe, thumbFallbackForRecipe, videoForRecipe } from "@/lib/me
 import { useFavorites } from "@/lib/favorites";
 import { logPlanChangeToCoach } from "@/lib/coachSync";
 import { trackEvent } from "@/lib/usage";
+import { nextRefreshLabel } from "@/lib/weekRefresh";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/fresh-meals")({
@@ -344,6 +345,17 @@ function FreshMealsPage() {
             </div>
             <h1 className="page-title mt-1">Today's Fresh Meals</h1>
             <p className="text-xs text-muted-foreground">Breakfast → evening snack · macro-smart swaps</p>
+            <div className="mt-1.5 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-card/60 px-2 py-0.5 text-[11px] text-muted-foreground ring-1 ring-border/60">
+                <CalendarClock className="h-3 w-3" /> {nextRefreshLabel()}
+              </span>
+              <button
+                onClick={() => { trackEvent("meal_regenerate", { ref_label: "get_new_meals" }); regenAll(); }}
+                className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary hover:bg-primary/20 transition"
+              >
+                <RefreshCcw className="h-3 w-3" /> Get new meals
+              </button>
+            </div>
           </div>
           <button onClick={() => setRegenOpen(true)} aria-label="Regenerate" className="grid h-10 w-10 place-items-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow hover:scale-105 transition">
             <Wand2 className="h-4 w-4" />
