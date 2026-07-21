@@ -56,35 +56,35 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.22 0.04 245);
 
-  /* Vibrant teal — primary CTA / accent */
-  --primary: oklch(0.72 0.13 190);
+  /* Vibrant teal — primary CTA / accent (darkened for WCAG AA on white) */
+  --primary: oklch(0.5 0.11 200);
   --primary-foreground: oklch(1 0 0);
-  --primary-glow: oklch(0.8 0.13 195);
+  --primary-glow: oklch(0.78 0.13 195);
 
   /* Deep navy — strong text, headings, dark surfaces */
   --secondary: oklch(0.22 0.04 245);
   --secondary-foreground: oklch(1 0 0);
 
   --muted: oklch(0.96 0.005 240);
-  --muted-foreground: oklch(0.5 0.015 245);
+  --muted-foreground: oklch(0.42 0.015 245);
 
-  --accent: oklch(0.72 0.13 190);
+  --accent: oklch(0.5 0.11 200);
   --accent-foreground: oklch(1 0 0);
 
-  --destructive: oklch(0.6 0.22 25);
+  --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(1 0 0);
 
-  --success: oklch(0.72 0.13 190);
-  --warning: oklch(0.78 0.16 75);
+  --success: oklch(0.5 0.11 200);
+  --warning: oklch(0.55 0.16 65);
 
-  --border: oklch(0.9 0.008 240);
+  --border: oklch(0.88 0.008 240);
   --input: oklch(0.94 0.006 240);
-  --ring: oklch(0.72 0.13 190);
+  --ring: oklch(0.5 0.11 200);
 
-  --gradient-primary: linear-gradient(135deg, oklch(0.72 0.13 190), oklch(0.66 0.13 200));
+  --gradient-primary: linear-gradient(135deg, oklch(0.5 0.11 200), oklch(0.46 0.11 210));
   --gradient-hero: linear-gradient(160deg, oklch(0.22 0.04 245) 0%, oklch(0.28 0.06 220) 55%, oklch(0.42 0.11 195) 100%);
   --gradient-card: linear-gradient(145deg, oklch(0.99 0.004 240), oklch(0.96 0.006 240));
-  --shadow-glow: 0 10px 40px -10px oklch(0.72 0.13 190 / 45%);
+  --shadow-glow: 0 10px 40px -10px oklch(0.5 0.11 200 / 45%);
   --shadow-card: 0 4px 24px -10px oklch(0.22 0.04 245 / 18%);
 }
 
@@ -104,6 +104,16 @@
   --muted-foreground: oklch(0.72 0.012 240);
   --border: oklch(0.34 0.04 245 / 70%);
   --input: oklch(0.3 0.04 245);
+  /* Bright teal reads well on dark bg; pair with navy text on buttons for AA */
+  --primary: oklch(0.78 0.13 195);
+  --primary-foreground: oklch(0.18 0.03 245);
+  --primary-glow: oklch(0.84 0.12 195);
+  --accent: oklch(0.78 0.13 195);
+  --accent-foreground: oklch(0.18 0.03 245);
+  --success: oklch(0.78 0.13 195);
+  --ring: oklch(0.78 0.13 195);
+  --gradient-primary: linear-gradient(135deg, oklch(0.72 0.13 195), oklch(0.62 0.12 210));
+  --shadow-glow: 0 10px 40px -10px oklch(0.78 0.13 195 / 55%);
   --gradient-card: linear-gradient(145deg, oklch(0.26 0.04 245), oklch(0.22 0.035 245));
 }
 
