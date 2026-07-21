@@ -42,54 +42,69 @@
 :root {
   --radius: 1rem;
 
-  /* Dark-first premium fitness palette */
-  --background: oklch(0.16 0.012 240);
-  --foreground: oklch(0.98 0.005 240);
+  /* IronFlex Fitness — clean white base, deep navy text, vibrant teal accent */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.22 0.04 245);
 
-  --surface: oklch(0.21 0.014 240);
-  --surface-elevated: oklch(0.25 0.016 240);
+  /* Supporting surfaces: light gray + soft dark navy for contrast cards */
+  --surface: oklch(0.97 0.006 240);
+  --surface-elevated: oklch(0.22 0.04 245);
 
-  --card: oklch(0.21 0.014 240);
-  --card-foreground: oklch(0.98 0.005 240);
+  --card: oklch(0.98 0.005 240);
+  --card-foreground: oklch(0.22 0.04 245);
 
-  --popover: oklch(0.23 0.015 240);
-  --popover-foreground: oklch(0.98 0.005 240);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.04 245);
 
-  /* Emerald/teal energy */
-  --primary: oklch(0.78 0.17 165);
-  --primary-foreground: oklch(0.16 0.012 240);
-  --primary-glow: oklch(0.85 0.18 175);
+  /* Vibrant teal — primary CTA / accent */
+  --primary: oklch(0.72 0.13 190);
+  --primary-foreground: oklch(1 0 0);
+  --primary-glow: oklch(0.8 0.13 195);
 
-  --secondary: oklch(0.28 0.018 240);
-  --secondary-foreground: oklch(0.98 0.005 240);
+  /* Deep navy — strong text, headings, dark surfaces */
+  --secondary: oklch(0.22 0.04 245);
+  --secondary-foreground: oklch(1 0 0);
 
-  --muted: oklch(0.26 0.014 240);
-  --muted-foreground: oklch(0.68 0.012 240);
+  --muted: oklch(0.96 0.005 240);
+  --muted-foreground: oklch(0.5 0.015 245);
 
-  --accent: oklch(0.78 0.17 165);
-  --accent-foreground: oklch(0.16 0.012 240);
+  --accent: oklch(0.72 0.13 190);
+  --accent-foreground: oklch(1 0 0);
 
-  --destructive: oklch(0.65 0.22 25);
-  --destructive-foreground: oklch(0.98 0.005 240);
+  --destructive: oklch(0.6 0.22 25);
+  --destructive-foreground: oklch(1 0 0);
 
-  --success: oklch(0.78 0.17 165);
-  --warning: oklch(0.82 0.16 75);
+  --success: oklch(0.72 0.13 190);
+  --warning: oklch(0.78 0.16 75);
 
-  --border: oklch(0.3 0.014 240 / 60%);
-  --input: oklch(0.28 0.016 240);
-  --ring: oklch(0.78 0.17 165);
+  --border: oklch(0.9 0.008 240);
+  --input: oklch(0.94 0.006 240);
+  --ring: oklch(0.72 0.13 190);
 
-  --gradient-primary: linear-gradient(135deg, oklch(0.78 0.17 165), oklch(0.72 0.16 195));
-  --gradient-hero: linear-gradient(160deg, oklch(0.21 0.014 240) 0%, oklch(0.18 0.04 200) 60%, oklch(0.22 0.08 165) 100%);
-  --gradient-card: linear-gradient(145deg, oklch(0.23 0.015 240), oklch(0.19 0.012 240));
-  --shadow-glow: 0 10px 40px -10px oklch(0.78 0.17 165 / 35%);
-  --shadow-card: 0 4px 24px -8px oklch(0 0 0 / 40%);
+  --gradient-primary: linear-gradient(135deg, oklch(0.72 0.13 190), oklch(0.66 0.13 200));
+  --gradient-hero: linear-gradient(160deg, oklch(0.22 0.04 245) 0%, oklch(0.28 0.06 220) 55%, oklch(0.42 0.11 195) 100%);
+  --gradient-card: linear-gradient(145deg, oklch(0.99 0.004 240), oklch(0.96 0.006 240));
+  --shadow-glow: 0 10px 40px -10px oklch(0.72 0.13 190 / 45%);
+  --shadow-card: 0 4px 24px -10px oklch(0.22 0.04 245 / 18%);
 }
 
 .dark {
-  /* Same — app is dark-first */
-  --background: oklch(0.16 0.012 240);
+  /* Optional dark mode retains navy base */
+  --background: oklch(0.18 0.03 245);
   --foreground: oklch(0.98 0.005 240);
+  --surface: oklch(0.24 0.04 245);
+  --surface-elevated: oklch(0.3 0.05 245);
+  --card: oklch(0.24 0.04 245);
+  --card-foreground: oklch(0.98 0.005 240);
+  --popover: oklch(0.24 0.04 245);
+  --popover-foreground: oklch(0.98 0.005 240);
+  --secondary: oklch(0.3 0.05 245);
+  --secondary-foreground: oklch(0.98 0.005 240);
+  --muted: oklch(0.26 0.04 245);
+  --muted-foreground: oklch(0.72 0.012 240);
+  --border: oklch(0.34 0.04 245 / 70%);
+  --input: oklch(0.3 0.04 245);
+  --gradient-card: linear-gradient(145deg, oklch(0.26 0.04 245), oklch(0.22 0.035 245));
 }
 
 @layer base {
