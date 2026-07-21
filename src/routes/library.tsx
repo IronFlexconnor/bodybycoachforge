@@ -39,7 +39,7 @@ function ytId(url: string | null): string | null {
 }
 function ytEmbed(url: string | null): string | null {
   const id = ytId(url);
-  return id ? `https://www.youtube.com/embed/${id}` : null;
+  return id ? `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&cc_load_policy=1&cc_lang_pref=en&hl=en` : null;
 }
 function ytThumb(url: string | null): string | null {
   const id = ytId(url);
@@ -201,7 +201,7 @@ function ExerciseSheet({ ex, onClose }: { ex: Exercise; onClose: () => void }) {
         {embed ? (
           <>
             <div className="mb-2 aspect-video overflow-hidden rounded-xl border border-border/60 bg-black">
-              <iframe src={embed} title={ex.name} allow="accelerometer; encrypted-media; picture-in-picture" allowFullScreen className="h-full w-full" />
+              <iframe src={embed} title={`${ex.name} — proper form demo video (captions available via the CC button)`} allow="accelerometer; encrypted-media; picture-in-picture" allowFullScreen className="h-full w-full" />
             </div>
             <a
               href={`https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name + " proper form demo")}`}

@@ -780,12 +780,16 @@ function DetailSheet({ recipe, onClose, isFav, onSave, onSwap, onAdd }: {
         <div className="aspect-video w-full bg-muted">
           <iframe
             src={video.embedUrl}
-            title={recipe.title}
+            title={`${recipe.title} — meal prep video (captions available via the CC button)`}
+            aria-describedby="meal-transcript-note"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             className="h-full w-full"
           />
         </div>
+        <p id="meal-transcript-note" className="sr-only">
+          Full ingredients, macros, and step-by-step prep instructions for this recipe are listed below the video as an accessible text alternative.
+        </p>
         <div className="max-h-[55vh] overflow-y-auto p-5">
           <div className="mb-2 flex items-center gap-2">
             <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">{recipe.meal_type}</span>

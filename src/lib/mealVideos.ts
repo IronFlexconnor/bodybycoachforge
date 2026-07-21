@@ -138,7 +138,7 @@ export function videoForRecipe(opts: RecipeLike, offset = 0): MealVideoMeta {
   const pick = pickVideo(opts, offset);
   return {
     id: pick.id,
-    embedUrl: `https://www.youtube.com/embed/${pick.id}?rel=0&modestbranding=1&playsinline=1`,
+    embedUrl: `https://www.youtube.com/embed/${pick.id}?rel=0&modestbranding=1&playsinline=1&cc_load_policy=1&cc_lang_pref=en&hl=en`,
     watchUrl: `https://www.youtube.com/watch?v=${pick.id}`,
     title: pick.title,
   };
