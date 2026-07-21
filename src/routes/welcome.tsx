@@ -90,7 +90,7 @@ function Welcome() {
                 />
               ))}
             </div>
-            <button onClick={() => navigate({ to: "/auth" })} className="text-xs font-medium text-muted-foreground hover:text-foreground">
+            <button onClick={() => navigate({ to: "/auth" })} className="text-xs font-bold text-white hover:text-white">
               Skip
             </button>
           </div>
@@ -102,14 +102,14 @@ function Welcome() {
             <div className="mb-3 inline-flex w-fit mx-auto items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
               <Sparkles className="h-3 w-3" /> {slide.badge}
             </div>
-            <h2 className="text-center text-3xl font-bold leading-tight tracking-tight">{slide.title}</h2>
-            <p className="mx-auto mt-3 max-w-sm text-center text-base leading-relaxed text-muted-foreground">
+            <h2 className="text-center text-3xl font-bold leading-tight tracking-tight text-white">{slide.title}</h2>
+            <p className="mx-auto mt-3 max-w-sm text-center text-base font-semibold leading-relaxed text-white">
               {slide.desc}
             </p>
 
             <ul className="mx-auto mt-7 w-full max-w-sm space-y-2.5">
               {slide.bullets.map((b) => (
-                <li key={b} className="flex items-center gap-3 rounded-2xl border border-border/60 bg-gradient-card px-4 py-3 text-sm shadow-card">
+                <li key={b} className="flex items-center gap-3 rounded-2xl border border-border/60 bg-gradient-card px-4 py-3 text-sm font-semibold text-white shadow-card">
                   <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
                     <Check className="h-4 w-4" strokeWidth={3} />
                   </span>
@@ -182,7 +182,7 @@ function Welcome() {
               Your 24/7 Trainer
             </span>
           </h1>
-          <p className="mt-5 max-w-md text-[16px] font-medium leading-[1.5] text-white/80 animate-fade-in [text-wrap:pretty] sm:mt-6 sm:text-[1.35rem] sm:leading-[1.5]">
+          <p className="mt-5 max-w-md text-[16px] font-semibold leading-[1.5] text-white animate-fade-in [text-wrap:pretty] sm:mt-6 sm:text-[1.35rem] sm:leading-[1.5]">
             Custom plans. Real-time form feedback. Nutrition that actually tastes good.
           </p>
 
@@ -203,11 +203,11 @@ function Welcome() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold">Coach Forge</span>
+                  <span className="font-bold text-white">Coach Forge</span>
                   <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Online</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white">Online</span>
                 </div>
-                <p className="mt-1.5 text-sm leading-relaxed text-foreground/90">
+                <p className="mt-1.5 text-sm font-semibold leading-relaxed text-white">
                   "Hey! I just built tomorrow's session for you — 4 lifts, 38 minutes, and I swapped in higher-protein dinners. Tap below to get started 💪"
                 </p>
               </div>
@@ -216,8 +216,8 @@ function Welcome() {
           {/* Live app preview — interactive cards mirroring the dashboard */}
           <div className="mt-6 space-y-3 animate-fade-in">
             <div className="flex items-center justify-between px-1">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">A peek inside</div>
-              <div className="inline-flex items-center gap-1 text-[11px] text-primary">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-white">A peek inside</div>
+              <div className="inline-flex items-center gap-1 text-[11px] font-bold text-primary">
                 <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Live
               </div>
             </div>
@@ -231,12 +231,12 @@ function Welcome() {
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
                   <Dumbbell className="h-3 w-3" /> Today · Push
                 </span>
-                <span className="text-[10px] text-muted-foreground">38 min</span>
+                <span className="text-[10px] font-semibold text-white">38 min</span>
               </div>
-              <div className="mt-2 font-bold leading-tight">Bench · OHP · Incline DB · Triceps</div>
-              <div className="mt-2 flex items-center gap-2 text-[11px] text-muted-foreground">
+              <div className="mt-2 font-bold leading-tight text-white">Bench · OHP · Incline DB · Triceps</div>
+              <div className="mt-2 flex items-center gap-2 text-[11px] font-semibold text-white">
                 <Flame className="h-3.5 w-3.5 text-primary" /> Auto-tuned to RPE 7 · 4 lifts
-                <span className="ml-auto inline-flex items-center gap-0.5 font-semibold text-primary">
+                <span className="ml-auto inline-flex items-center gap-0.5 font-bold text-primary">
                   Open <ChevronRight className="h-3.5 w-3.5" />
                 </span>
               </div>
@@ -254,12 +254,12 @@ function Welcome() {
                     <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
                       <Play className="h-2.5 w-2.5 fill-current" /> Prep video
                     </span>
-                    <span className="text-[10px] text-muted-foreground">42g protein</span>
+                    <span className="text-[10px] font-semibold text-white">42g protein</span>
                   </div>
-                  <div className="mt-1 truncate font-semibold">Honey-Garlic Salmon Bowl</div>
-                  <div className="text-[11px] text-muted-foreground">Fresh today · 18 min</div>
+                  <div className="mt-1 truncate font-bold text-white">Honey-Garlic Salmon Bowl</div>
+                  <div className="text-[11px] font-semibold text-white">Fresh today · 18 min</div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <ChevronRight className="h-4 w-4 text-white" />
               </div>
             </button>
 
@@ -272,10 +272,10 @@ function Welcome() {
                 <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
                   <TrendingUp className="h-3 w-3" /> Latest insight
                 </span>
-                <span className="text-[10px] text-muted-foreground">2 min read</span>
+                <span className="text-[10px] font-semibold text-white">2 min read</span>
               </div>
-              <div className="mt-2 font-semibold leading-snug">Lengthened-bias work grows muscle ~12% faster</div>
-              <p className="mt-1 line-clamp-2 text-[11px] text-muted-foreground">New 2026 meta finds stretch-position reps drive more hypertrophy at matched effort.</p>
+              <div className="mt-2 font-bold leading-snug text-white">Lengthened-bias work grows muscle ~12% faster</div>
+              <p className="mt-1 line-clamp-2 text-[11px] font-semibold text-white">New 2026 meta finds stretch-position reps drive more hypertrophy at matched effort.</p>
             </button>
           </div>
 
@@ -291,8 +291,8 @@ function Welcome() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1 text-[11px] text-amber-400">{"★★★★★"}</div>
-                  <p className="mt-0.5 text-[13px] leading-snug text-foreground/90">"{t.quote}"</p>
-                  <div className="mt-1 text-[11px] text-muted-foreground">{t.name} · {t.role}</div>
+                  <p className="mt-0.5 text-[13px] font-semibold leading-snug text-white">"{t.quote}"</p>
+                  <div className="mt-1 text-[11px] font-semibold text-white">{t.name} · {t.role}</div>
                 </div>
               </div>
             ))}
@@ -308,16 +308,16 @@ function Welcome() {
             <Sparkles className="mr-2 h-5 w-5" />
             Start My Free 7-Day Trial
           </Button>
-          <p className="text-center text-[12px] font-semibold text-white/70">
+          <p className="text-center text-[12px] font-bold text-white">
             Then $14.99/mo · cancel anytime
           </p>
           <button
             onClick={() => setShowOnboarding(true)}
-            className="flex w-full items-center justify-center gap-1.5 py-1 text-sm font-semibold text-white/75 transition-colors hover:text-white"
+            className="flex w-full items-center justify-center gap-1.5 py-1 text-sm font-bold text-white transition-colors hover:text-white"
           >
             See how it works <ChevronRight className="h-4 w-4" />
           </button>
-          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 pt-0.5 text-[11px] text-white/60">
+          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 pt-0.5 text-[11px] font-semibold text-white">
             <span className="inline-flex items-center gap-1"><Heart className="h-3 w-3 text-primary" /> No credit card</span>
             <span aria-hidden>·</span>
             <span>Cancel anytime</span>
