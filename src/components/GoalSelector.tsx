@@ -88,33 +88,33 @@ export function GoalSelector({ onBuilt, compact }: Props) {
                 "group relative overflow-hidden rounded-2xl border p-4 text-left transition-all active:scale-[0.98]",
                 "bg-gradient-to-br", g.accent,
                 g.id.includes("geriatric") || g.id.includes("fall") || g.id.includes("senior") || g.id.includes("bone") || g.id.includes("rehab") || g.id.includes("aging") ? "min-h-[150px] border-primary/30" : "",
-                on ? "border-primary shadow-glow" : "border-border/60 hover:border-primary/50",
-              )}
-            >
-              <div className="text-3xl">{g.emoji}</div>
-              <div className="mt-2 font-bold leading-tight">{g.title}</div>
-              <p className="mt-1 line-clamp-2 text-[11px] text-muted-foreground">{g.blurb}</p>
-              {on && building && (
-                <div className="absolute inset-0 grid place-items-center bg-background/70 backdrop-blur-sm">
-                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                </div>
-              )}
-            </button>
-          );
-        })}
+              on ? "border-primary shadow-glow" : "border-border/60 hover:border-primary/50",
+            )}
+          >
+            <div className="text-3xl">{g.emoji}</div>
+            <div className="mt-2 font-bold leading-tight text-white">{g.title}</div>
+            <p className="mt-1 line-clamp-2 text-[11px] font-semibold text-white">{g.blurb}</p>
+            {on && building && (
+              <div className="absolute inset-0 grid place-items-center bg-background/70 backdrop-blur-sm">
+                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              </div>
+            )}
+          </button>
+        );
+      })}
 
-        <button
-          disabled={building}
-          onClick={() => setShowCustom((s) => !s)}
-          className={cn(
-            "rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-4 text-left transition-all hover:border-primary",
-            showCustom && "border-primary bg-primary/10",
-          )}
-        >
-          <div className="text-3xl">🎯</div>
-          <div className="mt-2 font-bold leading-tight">Custom Goal</div>
-          <p className="mt-1 text-[11px] text-muted-foreground">Type anything — Coach builds it.</p>
-        </button>
+      <button
+        disabled={building}
+        onClick={() => setShowCustom((s) => !s)}
+        className={cn(
+          "rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-4 text-left transition-all hover:border-primary",
+          showCustom && "border-primary bg-primary/10",
+        )}
+      >
+        <div className="text-3xl">🎯</div>
+        <div className="mt-2 font-bold leading-tight text-white">Custom Goal</div>
+        <p className="mt-1 text-[11px] font-semibold text-white">Type anything — Coach builds it.</p>
+      </button>
       </div>
 
       {showCustom && (

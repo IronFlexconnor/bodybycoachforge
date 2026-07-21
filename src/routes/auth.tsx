@@ -95,48 +95,48 @@ function AuthPage() {
             <>Welcome <span className="bg-gradient-to-r from-white via-primary to-primary bg-clip-text text-transparent">back</span>.</>
           )}
         </h1>
-        <p className="mt-4 text-lg font-medium leading-snug text-white/80">
+        <p className="mt-4 text-lg font-bold leading-snug text-white">
           {isSignup ? "Create an account — your AI coach starts now." : "Pick up right where you left off."}
         </p>
 
         <form onSubmit={submit} className="mt-9 space-y-4">
           {isSignup && (
             <div className="space-y-1.5">
-              <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-white/90">Your name</label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Alex Carter" className="h-13 border-white/15 bg-white/[0.06] text-base font-semibold text-white placeholder:text-white/40 focus-visible:border-primary focus-visible:ring-primary/40" />
+              <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-white">Your name</label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Alex Carter" className="h-13 border-white/15 bg-white/[0.06] text-base font-bold text-white placeholder:text-white/80 focus-visible:border-primary focus-visible:ring-primary/40" />
             </div>
           )}
           <div className="space-y-1.5">
-            <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-white/90">Email</label>
+            <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-white">Email</label>
             <div className="relative">
-              <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
-              <Input id="email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="you@ironflex.app" className="h-13 border-white/15 bg-white/[0.06] pl-10 text-base font-semibold text-white placeholder:text-white/40 focus-visible:border-primary focus-visible:ring-primary/40" />
+              <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white" />
+              <Input id="email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="you@ironflex.app" className="h-13 border-white/15 bg-white/[0.06] pl-10 text-base font-bold text-white placeholder:text-white/80 focus-visible:border-primary focus-visible:ring-primary/40" />
             </div>
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-white/90">Password</label>
+            <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-white">Password</label>
             <div className="relative">
-              <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
-              <Input id="password" value={password} onChange={(e) => setPassword(e.target.value)} type="password" required minLength={isSignup ? 8 : 6} placeholder={isSignup ? "At least 8 characters" : "Your password"} className="h-13 border-white/15 bg-white/[0.06] pl-10 text-base font-semibold text-white placeholder:text-white/40 focus-visible:border-primary focus-visible:ring-primary/40" />
+              <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white" />
+              <Input id="password" value={password} onChange={(e) => setPassword(e.target.value)} type="password" required minLength={isSignup ? 8 : 6} placeholder={isSignup ? "At least 8 characters" : "Your password"} className="h-13 border-white/15 bg-white/[0.06] pl-10 text-base font-bold text-white placeholder:text-white/80 focus-visible:border-primary focus-visible:ring-primary/40" />
             </div>
           </div>
           {isSignup && <PasswordStrengthMeter password={password} />}
-          <Button type="submit" disabled={busy} className="h-13 w-full rounded-xl bg-gradient-primary text-base font-bold tracking-wide text-white shadow-[0_10px_30px_-10px_oklch(0.56_0.17_195/0.7)] hover:brightness-110">
+          <Button type="submit" disabled={busy} className="h-13 w-full rounded-xl bg-gradient-primary text-base font-extrabold tracking-wide text-white shadow-[0_10px_30px_-10px_oklch(0.56_0.17_195/0.7)] hover:brightness-110">
             {busy ? "Working…" : isSignup ? "Create account" : "Sign in"}
           </Button>
         </form>
 
-        <div className="my-6 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">
+        <div className="my-6 flex items-center gap-3 text-[11px] font-extrabold uppercase tracking-[0.2em] text-white">
           <div className="h-px flex-1 bg-white/15" /> or <div className="h-px flex-1 bg-white/15" />
         </div>
 
-        <Button onClick={google} disabled={busy} variant="outline" className="h-13 w-full rounded-xl border-white/20 bg-white/[0.06] text-base font-bold text-white hover:bg-white/[0.12] hover:text-white">
+        <Button onClick={google} disabled={busy} variant="outline" className="h-13 w-full rounded-xl border-white/20 bg-white/[0.06] text-base font-extrabold text-white hover:bg-white/[0.12] hover:text-white">
           <GoogleIcon /> Continue with Google
         </Button>
 
-        <button onClick={() => setMode((m) => (m === "signup" ? "signin" : "signup"))} className="mt-8 text-center text-sm font-medium text-white/70 hover:text-white">
+        <button onClick={() => setMode((m) => (m === "signup" ? "signin" : "signup"))} className="mt-8 text-center text-sm font-bold text-white hover:text-white">
           {isSignup ? "Already have an account? " : "New here? "}
-          <span className="font-bold text-primary underline-offset-4 hover:underline">{isSignup ? "Sign in" : "Create account"}</span>
+          <span className="font-extrabold text-primary underline-offset-4 hover:underline">{isSignup ? "Sign in" : "Create account"}</span>
         </button>
       </div>
     </div>

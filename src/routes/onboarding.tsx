@@ -311,26 +311,26 @@ function Onboarding() {
       <div className="mx-auto flex min-h-dvh max-w-lg flex-col px-6 pt-10 pb-8">
         <div className="mb-8 flex items-center gap-3">
           <button onClick={() => (step > 0 ? setStep((s) => s - 1) : navigate({ to: "/welcome" }))}
-            className="grid h-9 w-9 place-items-center rounded-full bg-surface text-muted-foreground hover:text-foreground" aria-label="Back">
+            className="grid h-9 w-9 place-items-center rounded-full bg-surface text-white hover:text-white" aria-label="Back">
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface">
             <div className="h-full bg-gradient-primary transition-all duration-500" style={{ width: `${progress}%` }} />
           </div>
-          <span className="text-xs font-medium text-muted-foreground tabular-nums">{step + 1}/{steps.length}</span>
+          <span className="text-xs font-bold text-white tabular-nums">{step + 1}/{steps.length}</span>
         </div>
 
         <div className="flex-1">
           <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
             <Flame className="h-3.5 w-3.5" /> Step {step + 1}
           </div>
-          <h1 className="mb-2 text-3xl font-bold tracking-tight">{current.title}</h1>
-          <p className="mb-8 text-muted-foreground">{current.subtitle}</p>
+          <h1 className="mb-2 text-3xl font-bold tracking-tight text-white">{current.title}</h1>
+          <p className="mb-8 text-base font-semibold text-white">{current.subtitle}</p>
           <div>{current.body}</div>
         </div>
 
         <Button onClick={next} disabled={!current.valid || building} size="lg"
-          className="h-14 w-full rounded-2xl bg-gradient-primary text-base font-semibold text-primary-foreground shadow-glow disabled:opacity-40">
+          className="h-14 w-full rounded-2xl bg-gradient-primary text-base font-extrabold text-primary-foreground shadow-glow disabled:opacity-40">
           {building ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Building your program…</>
             : isLast ? "Build my program" : "Continue"}
           {!building && <ArrowRight className="ml-1 h-5 w-5" />}

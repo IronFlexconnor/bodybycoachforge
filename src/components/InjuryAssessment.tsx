@@ -71,10 +71,10 @@ export function InjuryAssessment({
             <ShieldAlert className="h-5 w-5" />
           </div>
           <div>
-            <h2 id="injury-title" className="text-lg font-bold tracking-tight">
+            <h2 id="injury-title" className="text-lg font-bold tracking-tight text-white">
               Any Injuries or Limitations?
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm font-semibold text-white">
               Do you have any current or past injuries, pain, or limitations the AI coach should work around or progress safely?
             </p>
           </div>
@@ -91,8 +91,8 @@ export function InjuryAssessment({
               onClick={() => toggle(item)}
               aria-pressed={on}
               className={cn(
-                "flex items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left text-sm font-medium transition-all",
-                on ? "border-primary bg-primary/10 text-primary shadow-glow" : "border-border bg-gradient-card hover:border-primary/50",
+                "flex items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left text-sm font-semibold transition-all",
+                on ? "border-primary bg-primary/10 text-primary shadow-glow" : "border-border bg-gradient-card text-white hover:border-primary/50",
               )}
             >
               <span
@@ -110,7 +110,7 @@ export function InjuryAssessment({
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <label className="text-xs font-bold uppercase tracking-wider text-white">
           Other notes (optional)
         </label>
         <Textarea
@@ -118,7 +118,7 @@ export function InjuryAssessment({
           onChange={(e) => onChange({ ...value, notes: e.target.value })}
           placeholder="Describe any other injuries, surgeries, or limitations (e.g. progressing shoulder injury, recovering knee, etc.)"
           rows={4}
-          className="text-base"
+          className="text-base font-semibold text-white placeholder:text-white/80"
         />
       </div>
     </section>

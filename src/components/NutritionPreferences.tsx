@@ -64,16 +64,16 @@ export function NutritionPreferencesForm({
   return (
     <div className="space-y-6">
       <section>
-        <h3 className="mb-3 text-sm font-semibold text-foreground">What is your main bodyweight goal?</h3>
+        <h3 className="mb-3 text-sm font-bold text-white">What is your main bodyweight goal?</h3>
         <div className="grid grid-cols-2 gap-3">
           {BODYWEIGHT_GOALS.map((g) => {
             const on = value.bodyweightGoal === g.id;
             return (
               <button key={g.id} type="button" onClick={() => onChange({ ...value, bodyweightGoal: g.id })}
                 className={cn("rounded-2xl border bg-gradient-card px-4 py-4 text-left transition-all",
-                  on ? "border-primary text-primary shadow-glow" : "border-border hover:border-primary/50")}>
-                <div className="text-sm font-semibold">{g.label}</div>
-                <div className="mt-0.5 text-[11px] text-muted-foreground">{g.sub}</div>
+                  on ? "border-primary text-primary shadow-glow" : "border-border text-white hover:border-primary/50")}>
+                <div className="text-sm font-bold">{g.label}</div>
+                <div className="mt-0.5 text-[11px] font-semibold text-white">{g.sub}</div>
               </button>
             );
           })}
@@ -84,19 +84,19 @@ export function NutritionPreferencesForm({
           placeholder={`Target weight (${weightUnitLabel}) — optional`}
           value={value.targetWeight ?? ""}
           onChange={(e) => onChange({ ...value, targetWeight: e.target.value ? Number(e.target.value) : null })}
-          className="mt-3 h-12"
+          className="mt-3 h-12 font-semibold text-white placeholder:text-white/80"
         />
       </section>
 
       <section>
-        <h3 className="mb-3 text-sm font-semibold text-foreground">Dietary preferences</h3>
+        <h3 className="mb-3 text-sm font-bold text-white">Dietary preferences</h3>
         <div className="flex flex-wrap gap-2">
           {DIET_OPTIONS.map((d) => {
             const on = value.diets.includes(d);
             return (
               <button key={d} type="button" onClick={() => toggle("diets", d)}
-                className={cn("rounded-full border px-4 py-2.5 text-sm font-medium transition-all",
-                  on ? "border-primary bg-primary/15 text-primary shadow-glow" : "border-border bg-surface hover:border-primary/50")}>
+                className={cn("rounded-full border px-4 py-2.5 text-sm font-semibold transition-all",
+                  on ? "border-primary bg-primary/15 text-primary shadow-glow" : "border-border bg-surface text-white hover:border-primary/50")}>
                 {on && <Check className="mr-1.5 inline h-3.5 w-3.5" />}{d}
               </button>
             );
@@ -105,14 +105,14 @@ export function NutritionPreferencesForm({
       </section>
 
       <section>
-        <h3 className="mb-3 text-sm font-semibold text-foreground">Allergies & intolerances</h3>
+        <h3 className="mb-3 text-sm font-bold text-white">Allergies & intolerances</h3>
         <div className="mb-3 flex flex-wrap gap-2">
           {ALLERGY_OPTIONS.map((a) => {
             const on = value.allergies.includes(a);
             return (
               <button key={a} type="button" onClick={() => toggle("allergies", a)}
-                className={cn("rounded-full border px-4 py-2.5 text-sm font-medium transition-all",
-                  on ? "border-destructive/70 bg-destructive/15 text-destructive" : "border-border bg-surface hover:border-destructive/50")}>
+                className={cn("rounded-full border px-4 py-2.5 text-sm font-semibold transition-all",
+                  on ? "border-destructive/70 bg-destructive/15 text-destructive" : "border-border bg-surface text-white hover:border-destructive/50")}>
                 {on && <Check className="mr-1.5 inline h-3.5 w-3.5" />}{a}
               </button>
             );
@@ -122,17 +122,17 @@ export function NutritionPreferencesForm({
           placeholder="Other allergies or foods to avoid (optional)"
           value={value.allergiesNotes}
           onChange={(e) => onChange({ ...value, allergiesNotes: e.target.value })}
-          className="min-h-20"
+          className="min-h-20 font-semibold text-white placeholder:text-white/80"
         />
       </section>
 
       <section>
-        <h3 className="mb-3 text-sm font-semibold text-foreground">Daily calorie goal</h3>
+        <h3 className="mb-3 text-sm font-bold text-white">Daily calorie goal</h3>
         <div className="mb-3 grid grid-cols-2 gap-3">
           {(["auto", "custom"] as const).map((m) => (
             <button key={m} type="button" onClick={() => onChange({ ...value, calorieMode: m })}
-              className={cn("rounded-2xl border bg-gradient-card px-4 py-4 text-left text-sm font-semibold transition-all",
-                value.calorieMode === m ? "border-primary text-primary shadow-glow" : "border-border hover:border-primary/50")}>
+              className={cn("rounded-2xl border bg-gradient-card px-4 py-4 text-left text-sm font-bold transition-all",
+                value.calorieMode === m ? "border-primary text-primary shadow-glow" : "border-border text-white hover:border-primary/50")}>
               {m === "auto" ? "Auto-calculate from my plan" : "Set my own"}
             </button>
           ))}
@@ -144,18 +144,18 @@ export function NutritionPreferencesForm({
             placeholder="e.g. 2400"
             value={value.calorieGoal ?? ""}
             onChange={(e) => onChange({ ...value, calorieGoal: e.target.value ? Number(e.target.value) : null })}
-            className="h-12"
+            className="h-12 font-semibold text-white placeholder:text-white/80"
           />
         )}
       </section>
 
       <section>
-        <h3 className="mb-3 text-sm font-semibold text-foreground">Meals per day</h3>
+        <h3 className="mb-3 text-sm font-bold text-white">Meals per day</h3>
         <div className="flex flex-wrap gap-2">
           {[2, 3, 4, 5, 6].map((n) => (
             <button key={n} type="button" onClick={() => onChange({ ...value, mealsPerDay: n })}
-              className={cn("h-12 w-12 rounded-full border text-base font-semibold transition-all",
-                value.mealsPerDay === n ? "border-primary bg-primary/15 text-primary shadow-glow" : "border-border bg-surface hover:border-primary/50")}>
+              className={cn("h-12 w-12 rounded-full border text-base font-bold transition-all",
+                value.mealsPerDay === n ? "border-primary bg-primary/15 text-primary shadow-glow" : "border-border bg-surface text-white hover:border-primary/50")}>
               {n}
             </button>
           ))}
@@ -164,7 +164,7 @@ export function NutritionPreferencesForm({
           placeholder="Meal timing notes (e.g. intermittent fasting 12–8pm)"
           value={value.mealTiming ?? ""}
           onChange={(e) => onChange({ ...value, mealTiming: e.target.value })}
-          className="mt-3 h-12"
+          className="mt-3 h-12 font-semibold text-white placeholder:text-white/80"
         />
       </section>
     </div>

@@ -43,10 +43,10 @@ export function HeightPicker({
             <Ruler className="h-5 w-5" />
           </div>
           <div>
-            <h2 id="height-title" className="text-lg font-bold tracking-tight">
+            <h2 id="height-title" className="text-lg font-bold tracking-tight text-white">
               What is your height?
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm font-semibold text-white">
               Pick your preferred format and enter your height.
             </p>
           </div>
@@ -75,7 +75,7 @@ export function HeightPicker({
               value={feet != null ? String(feet) : undefined}
               onValueChange={(v) => onChange({ feet: parseInt(v, 10), inches, cm })}
             >
-              <SelectTrigger className="h-14 rounded-2xl border-2 bg-gradient-card text-lg font-semibold">
+              <SelectTrigger className="h-14 rounded-2xl border-2 bg-gradient-card text-lg font-bold text-white placeholder:text-white/80">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>
@@ -90,7 +90,7 @@ export function HeightPicker({
               value={inches != null ? String(inches) : undefined}
               onValueChange={(v) => onChange({ feet, inches: parseInt(v, 10), cm })}
             >
-              <SelectTrigger className="h-14 rounded-2xl border-2 bg-gradient-card text-lg font-semibold">
+              <SelectTrigger className="h-14 rounded-2xl border-2 bg-gradient-card text-lg font-bold text-white placeholder:text-white/80">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>
@@ -114,13 +114,13 @@ export function HeightPicker({
               const n = e.target.value === "" ? null : parseInt(e.target.value, 10);
               onChange({ feet, inches, cm: Number.isFinite(n as number) ? (n as number) : null });
             }}
-            className="h-14 rounded-2xl border-2 text-lg font-semibold"
+            className="h-14 rounded-2xl border-2 text-lg font-bold text-white placeholder:text-white/80"
           />
         </Field>
       )}
 
       {!compact && (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs font-semibold text-white">
           You can change this anytime in Settings.
         </p>
       )}
@@ -144,8 +144,8 @@ function UnitButton({ selected, onClick, label, sub }: { selected: boolean; onCl
           <Check className="h-3 w-3" strokeWidth={3} />
         </span>
       )}
-      <div className={cn("text-base font-bold", selected ? "text-primary" : "text-foreground")}>{label}</div>
-      <div className="text-xs font-medium text-muted-foreground">{sub}</div>
+      <div className={cn("text-base font-bold", selected ? "text-primary" : "text-white")}>{label}</div>
+      <div className="text-xs font-semibold text-white">{sub}</div>
     </button>
   );
 }
@@ -153,7 +153,7 @@ function UnitButton({ selected, onClick, label, sub }: { selected: boolean; onCl
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="text-xs font-bold uppercase tracking-wider text-white">{label}</div>
       {children}
     </div>
   );
