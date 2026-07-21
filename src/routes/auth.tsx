@@ -74,48 +74,69 @@ function AuthPage() {
     }
   };
 
+  const isSignup = mode === "signup";
   return (
-    <div className="min-h-dvh bg-gradient-hero">
-      <div className="mx-auto flex min-h-dvh max-w-md flex-col px-6 pt-14 pb-8">
-        <div className="mb-8 inline-flex w-fit items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
-          <Sparkles className="h-3.5 w-3.5" /> Body Forge AI Coach
+    <div className="min-h-dvh bg-[oklch(0.18_0.04_245)] text-white">
+      {/* Ambient brand glow */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-32 -left-24 h-[26rem] w-[26rem] rounded-full bg-primary/25 blur-3xl" />
+        <div className="absolute bottom-[-8rem] right-[-6rem] h-[22rem] w-[22rem] rounded-full bg-primary/15 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto flex min-h-dvh max-w-md flex-col px-6 pt-14 pb-8">
+        <div className="mb-8 inline-flex w-fit items-center gap-2 rounded-full border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-white shadow-[0_0_24px_-8px_oklch(0.56_0.17_195/0.6)]">
+          <Sparkles className="h-3.5 w-3.5 text-primary" /> IronFlex AI Coach
         </div>
-        <h1 className="text-4xl font-bold tracking-tight">
-          {mode === "signup" ? <>Build your <span className="text-gradient-primary">program</span>.</> : <>Welcome <span className="text-gradient-primary">back</span>.</>}
+
+        <h1 className="font-display text-[clamp(2.5rem,8vw,3.75rem)] font-black leading-[1.02] tracking-[-0.03em] text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.35)]">
+          {isSignup ? (
+            <>Build your <span className="bg-gradient-to-r from-white via-primary to-primary bg-clip-text text-transparent">program</span>.</>
+          ) : (
+            <>Welcome <span className="bg-gradient-to-r from-white via-primary to-primary bg-clip-text text-transparent">back</span>.</>
+          )}
         </h1>
-        <p className="mt-3 text-muted-foreground">
-          {mode === "signup" ? "Create an account — your AI coach starts now." : "Pick up right where you left off."}
+        <p className="mt-4 text-lg font-medium leading-snug text-white/80">
+          {isSignup ? "Create an account — your AI coach starts now." : "Pick up right where you left off."}
         </p>
 
-        <form onSubmit={submit} className="mt-8 space-y-3">
-          {mode === "signup" && (
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="h-13" />
+        <form onSubmit={submit} className="mt-9 space-y-4">
+          {isSignup && (
+            <div className="space-y-1.5">
+              <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-white/90">Your name</label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Alex Carter" className="h-13 border-white/15 bg-white/[0.06] text-base font-semibold text-white placeholder:text-white/40 focus-visible:border-primary focus-visible:ring-primary/40" />
+            </div>
           )}
-          <div className="relative">
-            <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="Email" className="h-13 pl-10" />
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-white/90">Email</label>
+            <div className="relative">
+              <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
+              <Input id="email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="you@ironflex.app" className="h-13 border-white/15 bg-white/[0.06] pl-10 text-base font-semibold text-white placeholder:text-white/40 focus-visible:border-primary focus-visible:ring-primary/40" />
+            </div>
           </div>
-          <div className="relative">
-            <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required minLength={mode === "signup" ? 8 : 6} placeholder={mode === "signup" ? "Password (min 8)" : "Password"} className="h-13 pl-10" />
+          <div className="space-y-1.5">
+            <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-white/90">Password</label>
+            <div className="relative">
+              <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
+              <Input id="password" value={password} onChange={(e) => setPassword(e.target.value)} type="password" required minLength={isSignup ? 8 : 6} placeholder={isSignup ? "At least 8 characters" : "Your password"} className="h-13 border-white/15 bg-white/[0.06] pl-10 text-base font-semibold text-white placeholder:text-white/40 focus-visible:border-primary focus-visible:ring-primary/40" />
+            </div>
           </div>
-          {mode === "signup" && <PasswordStrengthMeter password={password} />}
-          <Button type="submit" disabled={busy} className="h-13 w-full rounded-xl bg-gradient-primary font-semibold text-primary-foreground shadow-glow">
-            {busy ? "Working…" : mode === "signup" ? "Create account" : "Sign in"}
+          {isSignup && <PasswordStrengthMeter password={password} />}
+          <Button type="submit" disabled={busy} className="h-13 w-full rounded-xl bg-gradient-primary text-base font-bold tracking-wide text-white shadow-[0_10px_30px_-10px_oklch(0.56_0.17_195/0.7)] hover:brightness-110">
+            {busy ? "Working…" : isSignup ? "Create account" : "Sign in"}
           </Button>
         </form>
 
-        <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-wider text-muted-foreground">
-          <div className="h-px flex-1 bg-border" /> or <div className="h-px flex-1 bg-border" />
+        <div className="my-6 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white/60">
+          <div className="h-px flex-1 bg-white/15" /> or <div className="h-px flex-1 bg-white/15" />
         </div>
 
-        <Button onClick={google} disabled={busy} variant="outline" className="h-13 w-full rounded-xl border-border bg-surface font-semibold">
+        <Button onClick={google} disabled={busy} variant="outline" className="h-13 w-full rounded-xl border-white/20 bg-white/[0.06] text-base font-bold text-white hover:bg-white/[0.12] hover:text-white">
           <GoogleIcon /> Continue with Google
         </Button>
 
-        <button onClick={() => setMode((m) => (m === "signup" ? "signin" : "signup"))} className="mt-6 text-center text-sm text-muted-foreground hover:text-foreground">
-          {mode === "signup" ? "Already have an account? " : "New here? "}
-          <span className="font-semibold text-primary">{mode === "signup" ? "Sign in" : "Create account"}</span>
+        <button onClick={() => setMode((m) => (m === "signup" ? "signin" : "signup"))} className="mt-8 text-center text-sm font-medium text-white/70 hover:text-white">
+          {isSignup ? "Already have an account? " : "New here? "}
+          <span className="font-bold text-primary underline-offset-4 hover:underline">{isSignup ? "Sign in" : "Create account"}</span>
         </button>
       </div>
     </div>
