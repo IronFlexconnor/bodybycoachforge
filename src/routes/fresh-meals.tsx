@@ -198,7 +198,7 @@ function FreshMealsPage() {
   const [prefs, setPrefs] = useState<RegenPrefs>(DEFAULT_PREFS);
   const [regenOpen, setRegenOpen] = useState(false);
   const [overrides, setOverrides] = useState<Partial<Record<SlotKey, Recipe>>>({});
-  const [showShopping, setShowShopping] = useState(false);
+  const [showShopping, setShowShopping] = useState(true);
   const { isFav, toggle } = useFavorites();
 
   useEffect(() => {
