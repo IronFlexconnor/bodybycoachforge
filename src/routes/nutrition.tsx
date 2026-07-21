@@ -554,7 +554,7 @@ function Nutrition() {
 
                             {meal.training_rationale && <p className="mt-2 text-xs italic text-muted-foreground">{meal.training_rationale}</p>}
 
-                            {meal.prep_video?.url && <div className="mt-3"><MealPrepVideo recipe={{ slug: meal.title, title: meal.title, meal_type: meal.slot }} title={meal.title} categoryLabel={meal.slot} /></div>}
+                            {meal.prep_video?.url && <div className="mt-3"><MealPrepVideo recipe={{ slug: meal.title, title: meal.title, meal_type: meal.slot }} title={meal.title} categoryLabel={meal.slot} size="sm" /></div>}
 
                             {meal.ingredients_with_units?.length > 0 && (
                               <div className="mt-3">
