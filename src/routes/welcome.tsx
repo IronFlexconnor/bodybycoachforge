@@ -177,7 +177,7 @@ function Welcome() {
             style={{ textShadow: "0 2px 28px oklch(0.14 0.05 250 / 55%)" }}
           >
             <span className="block">Body Forge</span>
-            <span className="block text-white/85">AI Coach</span>
+            <span className="block text-white">AI Coach</span>
             <span className="mt-1.5 block bg-gradient-to-r from-white via-[oklch(0.94_0.1_195)] to-[oklch(0.78_0.17_190)] bg-clip-text text-transparent sm:mt-2">
               Your 24/7 Trainer
             </span>
