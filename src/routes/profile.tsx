@@ -85,7 +85,7 @@ function Profile() {
   return (
     <AppShell>
       <div className="px-5 pt-12">
-        <h1 className="mb-6 text-2xl font-bold">Profile</h1>
+        <h1 className="page-title mb-6">Profile</h1>
 
         <div className="mb-6 rounded-3xl border border-border/60 bg-gradient-card p-5 shadow-card">
           <div className="flex items-center gap-4">

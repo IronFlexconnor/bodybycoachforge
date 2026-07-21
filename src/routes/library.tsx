@@ -84,7 +84,7 @@ function Library() {
       <div className="px-5 pt-12">
         <div className="mb-5">
           <p className="text-sm text-muted-foreground">Reference</p>
-          <h1 className="text-2xl font-bold">Exercise Library</h1>
+          <h1 className="page-title">Exercise Library</h1>
           <p className="mt-1 text-sm text-muted-foreground">{items.length} exercises with demo videos. Coach Forge can reference these.</p>
         </div>
 

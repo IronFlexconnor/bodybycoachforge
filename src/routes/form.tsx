@@ -407,7 +407,7 @@ function FormAnalysis() {
         <div className="mb-1 inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
           <Sparkles className="h-3 w-3" /> AI Form Lab
         </div>
-        <h1 className="mb-1 text-2xl font-bold">Form Analysis</h1>
+        <h1 className="page-title mb-1">Form Analysis</h1>
         <p className="mb-5 text-sm text-muted-foreground">
           Record up to 15 seconds, upload a clip, or snap a photo. Coach grades your form in seconds —
           tied to your injuries and goals.

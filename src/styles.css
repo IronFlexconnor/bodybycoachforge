@@ -139,11 +139,13 @@
     line-height: 1.02;
     text-wrap: balance;
   }
-  h1 { font-weight: 900; letter-spacing: -0.05em; line-height: 0.98; }
-  h2 { font-weight: 800; letter-spacing: -0.04em; line-height: 1.03; }
-  h3 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
-  h4 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+  h1 { font-weight: 900; letter-spacing: -0.05em; line-height: 0.98; font-size: clamp(2rem, 5.2vw + 0.5rem, 3.75rem); }
+  h2 { font-weight: 800; letter-spacing: -0.04em; line-height: 1.03; font-size: clamp(1.5rem, 2.6vw + 0.6rem, 2.5rem); }
+  h3 { font-weight: 800; letter-spacing: -0.03em; line-height: 1.1;  font-size: clamp(1.2rem, 1.4vw + 0.7rem, 1.75rem); }
+  h4 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; font-size: clamp(1.05rem, 0.8vw + 0.75rem, 1.25rem); }
   p  { line-height: 1.6; text-wrap: pretty; }
+  small { font-size: 0.8125rem; letter-spacing: 0.005em; }
+  label { font-weight: 600; letter-spacing: -0.005em; }
   button { font-family: var(--font-sans); font-weight: 700; letter-spacing: -0.005em; }
   strong, b { font-weight: 800; }
 }
@@ -195,6 +197,35 @@
     line-height: 1;
   }
   .tracking-tightest { letter-spacing: -0.045em; }
+
+  /* Cross-app hierarchy helpers */
+  .page-title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    letter-spacing: -0.045em;
+    line-height: 1.0;
+    font-size: clamp(1.75rem, 3.5vw + 0.6rem, 2.75rem);
+    background: linear-gradient(135deg, var(--color-foreground) 0%, oklch(0.34 0.09 210) 55%, var(--color-primary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-wrap: balance;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    font-size: clamp(1.25rem, 1.4vw + 0.8rem, 1.75rem);
+    color: var(--color-foreground);
+    text-wrap: balance;
+  }
+  .lede {
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: color-mix(in oklab, var(--color-foreground) 78%, transparent);
+    text-wrap: pretty;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

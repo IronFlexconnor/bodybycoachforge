@@ -84,7 +84,7 @@ function InsightsPage() {
             <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
               <Sparkles className="h-3 w-3" /> Fresh today
             </div>
-            <h1 className="mt-1.5 text-2xl font-bold leading-tight">Latest Insights</h1>
+            <h1 className="page-title mt-1.5">Latest Insights</h1>
             <p className="text-sm text-muted-foreground">Curated by Coach from the newest health & fitness science.</p>
           </div>
           <button

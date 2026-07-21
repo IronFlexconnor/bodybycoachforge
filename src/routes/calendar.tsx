@@ -147,7 +147,7 @@ function CalendarPage() {
       <div className="px-5 pt-12 pb-6">
         <div className="mb-6">
           <p className="text-sm text-muted-foreground">Your training history</p>
-          <h1 className="text-2xl font-bold">Calendar</h1>
+          <h1 className="page-title">Calendar</h1>
         </div>
 
         <div className="mb-5 rounded-2xl border border-border/60 bg-gradient-card p-4 shadow-card">
