@@ -14,8 +14,8 @@ type RecipeLike = {
 type Props = {
   recipe: RecipeLike;
   title: string;
-  /** Show big hero-style thumb (Fresh Meals header) vs in-card. */
-  size?: "lg" | "md";
+  /** Hero (lg), in-card (md), or compact list view (sm) for faster browsing. */
+  size?: "lg" | "md" | "sm";
   /** Eager-load the thumbnail (above-the-fold). */
   priority?: boolean;
   /** Optional duration label, e.g. "12 min". */
