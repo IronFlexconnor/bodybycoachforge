@@ -103,8 +103,9 @@ export function MealPrepVideo({
     }, 450);
   };
 
-  const playBtnSize = size === "lg" ? "h-16 w-16" : "h-14 w-14";
-  const playIconSize = size === "lg" ? "h-8 w-8" : "h-7 w-7";
+  const playBtnSize = size === "lg" ? "h-16 w-16" : size === "sm" ? "h-10 w-10" : "h-14 w-14";
+  const playIconSize = size === "lg" ? "h-8 w-8" : size === "sm" ? "h-5 w-5" : "h-7 w-7";
+  const isCompact = size === "sm";
 
   return (
     <div
