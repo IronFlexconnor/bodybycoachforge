@@ -245,16 +245,18 @@ export function MealPrepVideo({
         )}
       </div>
 
-      {/* Premium action row */}
-      <div className="flex items-center justify-between gap-2 px-3 py-2">
-        <p className="line-clamp-1 text-[11px] text-muted-foreground">
-          Tap to autoplay · curated by Coach Forge
-        </p>
+      {/* Premium action row — compact size hides the caption to keep the card small */}
+      <div className={`flex items-center justify-between gap-2 px-3 ${isCompact ? "py-1.5" : "py-2"}`}>
+        {!isCompact && (
+          <p className="line-clamp-1 text-[11px] text-muted-foreground">
+            Tap to autoplay · curated by Coach Forge
+          </p>
+        )}
         <button
           type="button"
           onClick={handleRegenerate}
           disabled={regenerating}
-          className="group inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-gradient-to-r from-primary/10 to-accent/10 px-3 py-1.5 text-[11px] font-semibold text-primary shadow-sm transition hover:border-primary/60 hover:from-primary/20 hover:to-accent/20 disabled:opacity-60"
+          className={`group ml-auto inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-gradient-to-r from-primary/10 to-accent/10 ${isCompact ? "px-2 py-1 text-[10px]" : "px-3 py-1.5 text-[11px]"} font-semibold text-primary shadow-sm transition hover:border-primary/60 hover:from-primary/20 hover:to-accent/20 disabled:opacity-60`}
           aria-label="Regenerate prep video"
         >
           {regenerating ? (
@@ -262,8 +264,8 @@ export function MealPrepVideo({
           ) : (
             <RefreshCcw className="h-3.5 w-3.5 transition-transform group-hover:-rotate-180 duration-500 motion-reduce:group-hover:rotate-0" />
           )}
-          <span>Regenerate</span>
-          <Sparkles className="h-3 w-3 opacity-70" />
+          <span>{isCompact ? "New" : "Regenerate"}</span>
+          {!isCompact && <Sparkles className="h-3 w-3 opacity-70" />}
         </button>
       </div>
     </div>
