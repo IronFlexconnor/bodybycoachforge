@@ -345,6 +345,17 @@ function FreshMealsPage() {
             </div>
             <h1 className="page-title mt-1">Today's Fresh Meals</h1>
             <p className="text-xs text-muted-foreground">Breakfast → evening snack · macro-smart swaps</p>
+            <div className="mt-1.5 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-card/60 px-2 py-0.5 text-[11px] text-muted-foreground ring-1 ring-border/60">
+                <CalendarClock className="h-3 w-3" /> {nextRefreshLabel()}
+              </span>
+              <button
+                onClick={() => { trackEvent("meal_regenerate", { ref_label: "get_new_meals" }); regenAll(); }}
+                className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary hover:bg-primary/20 transition"
+              >
+                <RefreshCcw className="h-3 w-3" /> Get new meals
+              </button>
+            </div>
           </div>
           <button onClick={() => setRegenOpen(true)} aria-label="Regenerate" className="grid h-10 w-10 place-items-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow hover:scale-105 transition">
             <Wand2 className="h-4 w-4" />
