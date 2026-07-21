@@ -61,7 +61,7 @@ function Workouts() {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <p className="text-sm text-muted-foreground">Your Program</p>
-            <h1 className="text-2xl font-bold">Upcoming sessions</h1>
+            <h1 className="page-title">Upcoming sessions</h1>
           </div>
           <Link
             to="/calendar"

@@ -60,7 +60,7 @@ function Progress() {
   return (
     <AppShell>
       <div className="px-5 pt-12">
-        <h1 className="mb-1 text-2xl font-bold">Progress</h1>
+        <h1 className="page-title mb-1">Progress</h1>
         <p className="mb-6 text-sm text-muted-foreground">Last 8 weeks</p>
 
         <div className="mb-6 grid grid-cols-2 gap-3">

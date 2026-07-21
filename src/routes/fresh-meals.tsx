@@ -335,7 +335,7 @@ function FreshMealsPage() {
             <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
               <Sparkles className="h-3 w-3" /> Today's plan
             </div>
-            <h1 className="mt-1 text-2xl font-bold leading-tight">Today's Fresh Meals</h1>
+            <h1 className="page-title mt-1">Today's Fresh Meals</h1>
             <p className="text-xs text-muted-foreground">Breakfast → evening snack · macro-smart swaps</p>
           </div>
           <button onClick={() => setRegenOpen(true)} aria-label="Regenerate" className="grid h-10 w-10 place-items-center rounded-full bg-gradient-primary text-primary-foreground shadow-glow hover:scale-105 transition">

@@ -130,7 +130,7 @@ function BodyAnalysis() {
           <Link to="/profile" className="grid h-10 w-10 place-items-center rounded-full bg-surface"><ArrowLeft className="h-4 w-4" /></Link>
           <div>
             <p className="text-sm text-muted-foreground">Progress</p>
-            <h1 className="text-2xl font-bold">Body Composition</h1>
+            <h1 className="page-title">Body Composition</h1>
           </div>
         </div>
 
