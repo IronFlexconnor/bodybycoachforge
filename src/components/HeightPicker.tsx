@@ -43,10 +43,10 @@ export function HeightPicker({
             <Ruler className="h-5 w-5" />
           </div>
           <div>
-            <h2 id="height-title" className="text-lg font-bold tracking-tight text-white">
+            <h2 id="height-title" className="text-lg font-bold tracking-tight text-foreground">
               What is your height?
             </h2>
-            <p className="text-sm font-semibold text-white">
+            <p className="text-sm text-muted-foreground">
               Pick your preferred format and enter your height.
             </p>
           </div>
@@ -75,12 +75,14 @@ export function HeightPicker({
               value={feet != null ? String(feet) : undefined}
               onValueChange={(v) => onChange({ feet: parseInt(v, 10), inches, cm })}
             >
-              <SelectTrigger className="h-14 rounded-2xl border-2 bg-gradient-card text-lg font-bold text-white placeholder:text-white/80">
+              <SelectTrigger className="h-14 rounded-2xl border-2 bg-gradient-card text-lg font-bold text-foreground placeholder:text-muted-foreground">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>
                 {[4, 5, 6, 7].map((f) => (
-                  <SelectItem key={f} value={String(f)}>{f} ft</SelectItem>
+                  <SelectItem key={f} value={String(f)}>
+                    {f} ft
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -90,12 +92,14 @@ export function HeightPicker({
               value={inches != null ? String(inches) : undefined}
               onValueChange={(v) => onChange({ feet, inches: parseInt(v, 10), cm })}
             >
-              <SelectTrigger className="h-14 rounded-2xl border-2 bg-gradient-card text-lg font-bold text-white placeholder:text-white/80">
+              <SelectTrigger className="h-14 rounded-2xl border-2 bg-gradient-card text-lg font-bold text-foreground placeholder:text-muted-foreground">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>
                 {Array.from({ length: 12 }, (_, i) => i).map((i) => (
-                  <SelectItem key={i} value={String(i)}>{i} in</SelectItem>
+                  <SelectItem key={i} value={String(i)}>
+                    {i} in
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -114,21 +118,29 @@ export function HeightPicker({
               const n = e.target.value === "" ? null : parseInt(e.target.value, 10);
               onChange({ feet, inches, cm: Number.isFinite(n as number) ? (n as number) : null });
             }}
-            className="h-14 rounded-2xl border-2 text-lg font-bold text-white placeholder:text-white/80"
+            className="h-14 rounded-2xl border-2 text-lg font-bold text-foreground placeholder:text-muted-foreground"
           />
         </Field>
       )}
 
       {!compact && (
-        <p className="text-xs font-semibold text-white">
-          You can change this anytime in Settings.
-        </p>
+        <p className="text-xs text-muted-foreground">You can change this anytime in Settings.</p>
       )}
     </section>
   );
 }
 
-function UnitButton({ selected, onClick, label, sub }: { selected: boolean; onClick: () => void; label: string; sub: string }) {
+function UnitButton({
+  selected,
+  onClick,
+  label,
+  sub,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  label: string;
+  sub: string;
+}) {
   return (
     <button
       type="button"
@@ -136,7 +148,9 @@ function UnitButton({ selected, onClick, label, sub }: { selected: boolean; onCl
       aria-pressed={selected}
       className={cn(
         "relative flex flex-col items-center justify-center gap-1 rounded-2xl border-2 px-4 py-5 text-center transition-all",
-        selected ? "border-primary bg-primary/10 shadow-glow" : "border-border bg-gradient-card hover:border-primary/50",
+        selected
+          ? "border-primary bg-primary/10 shadow-glow"
+          : "border-border bg-gradient-card hover:border-primary/50",
       )}
     >
       {selected && (
@@ -144,8 +158,10 @@ function UnitButton({ selected, onClick, label, sub }: { selected: boolean; onCl
           <Check className="h-3 w-3" strokeWidth={3} />
         </span>
       )}
-      <div className={cn("text-base font-bold", selected ? "text-primary" : "text-white")}>{label}</div>
-      <div className="text-xs font-semibold text-white">{sub}</div>
+      <div className={cn("text-base font-bold", selected ? "text-primary" : "text-foreground")}>
+        {label}
+      </div>
+      <div className="text-xs text-muted-foreground">{sub}</div>
     </button>
   );
 }
@@ -153,14 +169,18 @@ function UnitButton({ selected, onClick, label, sub }: { selected: boolean; onCl
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <div className="text-xs font-bold uppercase tracking-wider text-white">{label}</div>
+      <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </div>
       {children}
     </div>
   );
 }
 
 export const ftInToCm = (ft: number, inches: number) => (ft * 12 + inches) * 2.54;
-export const cmToFtIn = (cm: number | null | undefined): { feet: number | null; inches: number | null } => {
+export const cmToFtIn = (
+  cm: number | null | undefined,
+): { feet: number | null; inches: number | null } => {
   if (cm == null || isNaN(Number(cm))) return { feet: null, inches: null };
   const totalIn = Math.round(Number(cm) / 2.54);
   return { feet: Math.floor(totalIn / 12), inches: totalIn % 12 };

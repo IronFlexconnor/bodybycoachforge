@@ -143,20 +143,24 @@ function Profile() {
       <div className="px-5 pt-12">
         <h1 className="page-title mb-6">Profile</h1>
 
-        <div className="mb-6 rounded-3xl border border-border/60 bg-gradient-card p-5 shadow-card">
-          <div className="flex items-center gap-4">
-            <div className="grid h-16 w-16 place-items-center rounded-full bg-gradient-primary text-2xl font-bold text-primary-foreground shadow-glow">
+        <div className="relative mb-6 overflow-hidden rounded-3xl border border-primary/25 bg-gradient-hero p-5 shadow-elevated">
+          <div className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-primary/25 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 -left-10 h-40 w-40 rounded-full bg-[oklch(0.62_0.13_205/0.2)] blur-3xl" />
+          <div className="relative flex items-center gap-4">
+            <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-primary text-2xl font-bold text-primary-foreground shadow-glow">
               {name.slice(0, 1).toUpperCase()}
             </div>
-            <div>
-              <div className="text-lg font-semibold">{name}</div>
-              <div className="text-sm text-muted-foreground">
+            <div className="min-w-0">
+              <div className="truncate font-display text-xl font-extrabold tracking-tight text-white">
+                {name}
+              </div>
+              <div className="text-sm font-medium text-white/80">
                 {p.level || "—"} · {p.goal || "No goal"}
               </div>
-              <div className="text-xs text-muted-foreground">{user?.email}</div>
+              <div className="truncate text-xs text-white/60">{user?.email}</div>
             </div>
           </div>
-          <div className="mt-5 grid grid-cols-3 divide-x divide-border/60 rounded-2xl bg-background/40 py-3 text-center">
+          <div className="relative mt-5 grid grid-cols-3 divide-x divide-white/10 rounded-2xl border border-white/10 bg-white/5 py-3 text-center text-white backdrop-blur-sm">
             <Mini label="Age" value={p.age ?? "—"} />
             <Mini label="Weight" value={displayWeight(p.weight, units)} />
             <Mini
@@ -385,7 +389,7 @@ function Mini({ label, value }: { label: string; value: string | number }) {
   return (
     <div>
       <div className="text-base font-bold tabular-nums">{value}</div>
-      <div className="text-[11px] text-muted-foreground">{label}</div>
+      <div className="text-[11px] opacity-60">{label}</div>
     </div>
   );
 }

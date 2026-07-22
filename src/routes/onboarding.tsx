@@ -448,7 +448,7 @@ function Onboarding() {
   };
 
   return (
-    <div className="min-h-dvh bg-gradient-hero">
+    <div className="dark min-h-dvh bg-gradient-hero text-foreground">
       <div className="mx-auto flex min-h-dvh max-w-lg flex-col px-6 pt-10 pb-8">
         <div className="mb-8 flex items-center gap-3">
           <button

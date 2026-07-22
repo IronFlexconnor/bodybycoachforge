@@ -35,7 +35,11 @@ export function parseInjuries(raw: string | null | undefined): InjuryState {
   if (head?.startsWith("Notes:")) {
     notes = head.replace(/^Notes:\s*/, "");
   } else if (head) {
-    selected = head.split(";").map((s) => s.trim()).filter(Boolean).filter((s) => COMMON_INJURIES.includes(s as any));
+    selected = head
+      .split(";")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .filter((s) => COMMON_INJURIES.includes(s as any));
   }
   if (notesIdx >= 0) notes = rest[notesIdx].replace(/^Notes:\s*/, "");
   return { selected, notes };
@@ -71,11 +75,12 @@ export function InjuryAssessment({
             <ShieldAlert className="h-5 w-5" />
           </div>
           <div>
-            <h2 id="injury-title" className="text-lg font-bold tracking-tight text-white">
+            <h2 id="injury-title" className="text-lg font-bold tracking-tight text-foreground">
               Any Injuries or Limitations?
             </h2>
-            <p className="text-sm font-semibold text-white">
-              Do you have any current or past injuries, pain, or limitations the AI coach should work around or progress safely?
+            <p className="text-sm text-muted-foreground">
+              Do you have any current or past injuries, pain, or limitations the AI coach should
+              work around or progress safely?
             </p>
           </div>
         </div>
@@ -92,13 +97,17 @@ export function InjuryAssessment({
               aria-pressed={on}
               className={cn(
                 "flex items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left text-sm font-semibold transition-all",
-                on ? "border-primary bg-primary/10 text-primary shadow-glow" : "border-border bg-gradient-card text-white hover:border-primary/50",
+                on
+                  ? "border-primary bg-primary/10 text-primary shadow-glow"
+                  : "border-border bg-gradient-card text-foreground hover:border-primary/50",
               )}
             >
               <span
                 className={cn(
                   "grid h-5 w-5 shrink-0 place-items-center rounded-md border-2 transition-all",
-                  on ? "border-primary bg-gradient-primary text-primary-foreground" : "border-border bg-background",
+                  on
+                    ? "border-primary bg-gradient-primary text-primary-foreground"
+                    : "border-border bg-background",
                 )}
               >
                 {on && <Check className="h-3 w-3" strokeWidth={3} />}
@@ -110,7 +119,7 @@ export function InjuryAssessment({
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-bold uppercase tracking-wider text-white">
+        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
           Other notes (optional)
         </label>
         <Textarea
@@ -118,7 +127,7 @@ export function InjuryAssessment({
           onChange={(e) => onChange({ ...value, notes: e.target.value })}
           placeholder="Describe any other injuries, surgeries, or limitations (e.g. progressing shoulder injury, recovering knee, etc.)"
           rows={4}
-          className="text-base font-semibold text-white placeholder:text-white/80"
+          className="text-base font-semibold text-foreground placeholder:text-muted-foreground"
         />
       </div>
     </section>

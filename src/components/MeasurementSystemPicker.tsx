@@ -27,17 +27,20 @@ export function MeasurementSystemPicker({
             <Scale className="h-5 w-5" />
           </div>
           <div>
-            <h2 id="measurement-system-title" className="text-lg font-bold tracking-tight text-white">
+            <h2
+              id="measurement-system-title"
+              className="text-lg font-bold tracking-tight text-foreground"
+            >
               Measurement System
             </h2>
-            <p className="text-sm font-semibold text-white">
+            <p className="text-sm text-muted-foreground">
               Preferred Measurement System for Tracking Exercises
             </p>
           </div>
         </div>
       )}
 
-      <p className={cn("text-sm font-semibold", compact ? "text-white" : "text-white")}>
+      <p className={cn("text-sm", "text-muted-foreground")}>
         What measurement system do you prefer for tracking your exercises?
       </p>
 
@@ -58,8 +61,9 @@ export function MeasurementSystemPicker({
       </div>
 
       {!compact && (
-        <p className="text-xs font-semibold text-white">
-          You can change this anytime in Settings. Past logged workouts keep the unit they were recorded in.
+        <p className="text-xs text-muted-foreground">
+          You can change this anytime in Settings. Past logged workouts keep the unit they were
+          recorded in.
         </p>
       )}
     </section>
@@ -101,10 +105,10 @@ function UnitButton({
           <Check className="h-3 w-3" strokeWidth={3} />
         </span>
       )}
-      <div className={cn("text-xl font-bold", selected ? "text-primary" : "text-white")}>
+      <div className={cn("text-xl font-bold", selected ? "text-primary" : "text-foreground")}>
         {label}
       </div>
-      <div className="text-sm font-semibold text-white">({unit})</div>
+      <div className="text-sm text-muted-foreground">({unit})</div>
     </button>
   );
 }
