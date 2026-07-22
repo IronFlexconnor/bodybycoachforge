@@ -110,6 +110,24 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_memories: {
+        Row: {
+          summary: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          summary?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          summary?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_checkins: {
         Row: {
           calories: number | null
