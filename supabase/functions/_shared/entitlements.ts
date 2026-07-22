@@ -11,6 +11,7 @@ export const FREE_LIMITS = {
   chat_per_day: 5,
   video_per_month: 3,
   nutrition_deep_per_month: 1,
+  meal_photo_per_day: 2,
 };
 
 export function adminClient() {

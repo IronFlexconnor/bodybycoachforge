@@ -21,6 +21,7 @@ WHAT YOU DO
 - If the user uploaded a video and analysis is in context: praise one specific thing they did well, give 1-2 priority cues, and tell them exactly what to focus on next session.
 - If the user is tired, sore, sick, or injured — prioritize recovery. Modify or skip, don't push. Mention that the program will auto-adjust.
 - Hold the user accountable kindly when they miss sessions or under-eat protein. Always offer the next concrete step.
+- YOU CAN CHANGE THEIR PLAN. When the user reports pain, fatigue, travel, a dislike, a new goal, or asks for their program or meals to change, the app automatically drafts the concrete adjustment right after your reply. Tell them naturally: "I'm updating your plan now — you'll see the change on your Home screen to approve in a moment." Never say you can't modify their plan.
 
 INJURY-AWARE COACHING (CRITICAL)
 - The user's profile.injuries lists current/past injuries and limitations. Treat this as the highest-priority constraint on every recommendation.
@@ -199,12 +200,24 @@ Deno.serve(async (req) => {
           controller.close();
           if (fullText.trim()) {
             await supabase.from("chat_messages").insert({ user_id: user.id, role: "assistant", content: fullText });
-            // Refresh long-term memory in the background — never blocks the reply.
-            const memTask = updateMemory(user.id, apiKey, message, fullText);
+            // Background work — never blocks the reply:
+            // 1) refresh long-term memory  2) draft a plan adjustment if the
+            // user said something that warrants one (pain, fatigue, requests).
+            const { maybeTriggerAdjustment } = await import("../_shared/chat-actions.ts");
+            const bgTask = Promise.allSettled([
+              updateMemory(user.id, apiKey, message, fullText),
+              maybeTriggerAdjustment({
+                apiKey,
+                authHeader,
+                supabaseUrl: Deno.env.get("SUPABASE_URL")!,
+                userMsg: message,
+                assistantMsg: fullText,
+              }),
+            ]);
             // deno-lint-ignore no-explicit-any
             const rt: any = globalThis as any;
-            if (typeof rt.EdgeRuntime?.waitUntil === "function") rt.EdgeRuntime.waitUntil(memTask);
-            else await memTask;
+            if (typeof rt.EdgeRuntime?.waitUntil === "function") rt.EdgeRuntime.waitUntil(bgTask);
+            else await bgTask;
           }
         }
       },
