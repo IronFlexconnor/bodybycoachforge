@@ -30,17 +30,22 @@ jobs:
       - name: Build app
         run: bun run build
 
-      - name: Start preview server
+      # The Cloudflare/nitro build outputs to .output/, which `vite preview`'s
+      # TanStack preview plugin can't serve (it expects dist/server/server.js).
+      # Use the dev server for the visual suite instead — same app, same styles,
+      # no dependency on build output layout. The build step above still guards
+      # against compile breakage.
+      - name: Start dev server
         run: |
-          bun run preview --host 127.0.0.1 --port 8080 > /tmp/preview.log 2>&1 &
+          bun run dev --host 127.0.0.1 --port 8080 > /tmp/preview.log 2>&1 &
           echo $! > /tmp/preview.pid
-          for i in $(seq 1 60); do
+          for i in $(seq 1 120); do
             if curl -sf http://127.0.0.1:8080 > /dev/null; then
-              echo "preview up"; exit 0
+              echo "dev server up"; exit 0
             fi
             sleep 1
           done
-          echo "preview failed to start"; cat /tmp/preview.log; exit 1
+          echo "dev server failed to start"; cat /tmp/preview.log; exit 1
 
       - name: Run visual regression suite
         run: bunx playwright test tests/e2e/visual-onboarding.spec.ts --reporter=list
@@ -59,4 +64,4 @@ jobs:
       - name: Stop preview server
         if: always()
         run: |
-          if [ -f /tmp/preview.pid ]; then kill "$(cat /tmp/preview.pid)" || true; fi
+          if [ -f /tmp/preview.pid ]; then kill "$(cat /tmp/preview.pid)" 2>/dev/null || true; fi
