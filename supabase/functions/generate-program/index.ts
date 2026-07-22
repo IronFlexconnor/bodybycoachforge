@@ -66,6 +66,27 @@ Deno.serve(async (req) => {
     const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle();
     if (!profile) return new Response(JSON.stringify({ error: "Complete your profile first" }), { status: 400, headers: cors });
 
+    // Free tier: cap full program rebuilds (each one is an LLM call).
+    // The first-ever build (onboarding) always fits inside the cap.
+    const { getPlanTier, countUsage, logUsage, FREE_LIMITS } = await import("../_shared/entitlements.ts");
+    const tier = await getPlanTier(user.id);
+    if (tier === "free") {
+      const monthStart = new Date();
+      monthStart.setDate(1);
+      monthStart.setHours(0, 0, 0, 0);
+      const used = await countUsage(user.id, "program_build", monthStart);
+      if (used >= FREE_LIMITS.program_builds_per_month) {
+        return new Response(
+          JSON.stringify({
+            error: "limit_reached",
+            code: "program_monthly_limit",
+            message: `You've used your ${FREE_LIMITS.program_builds_per_month} free program rebuilds this month. Upgrade to Pro Coach for unlimited program changes — start a 7-day free trial.`,
+          }),
+          { headers: { ...cors, "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     let body: any = {};
     try { body = await req.json(); } catch {}
     const goalOverride: string | undefined = body?.goal_override;
@@ -149,6 +170,9 @@ Deno.serve(async (req) => {
     if (rows.length) await supabase.from("workouts").insert(rows);
 
     await supabase.from("profiles").update({ onboarded: true }).eq("user_id", user.id);
+
+    // Count this build against the free-tier monthly cap
+    try { await logUsage(user.id, "program_build"); } catch { /* non-fatal */ }
 
     const summary = summarizeChanges(plan);
     return new Response(JSON.stringify({ program, sessions: rows.length, summary }), {

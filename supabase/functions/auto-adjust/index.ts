@@ -58,6 +58,24 @@ Deno.serve(async (req) => {
 
     const { trigger, workout_log_id, user_request, auto_apply } = await req.json().catch(() => ({}));
 
+    // Free tier: auto-adjust runs an LLM on every trigger, so cap it monthly.
+    // Past the cap we no-op silently — the UI only reacts when should_adjust
+    // is true, so free users simply see fewer automatic plan changes.
+    const { getPlanTier, countUsage, logUsage, FREE_LIMITS } = await import("../_shared/entitlements.ts");
+    const tier = await getPlanTier(user.id);
+    if (tier === "free") {
+      const monthStart = new Date();
+      monthStart.setDate(1);
+      monthStart.setHours(0, 0, 0, 0);
+      const used = await countUsage(user.id, "auto_adjust", monthStart);
+      if (used >= FREE_LIMITS.auto_adjust_per_month) {
+        return new Response(JSON.stringify({ should_adjust: false, skipped: "free_tier_cap" }), {
+          headers: { ...cors, "Content-Type": "application/json" },
+        });
+      }
+    }
+    try { await logUsage(user.id, "auto_adjust"); } catch { /* non-fatal */ }
+
     const today = new Date().toISOString().slice(0, 10);
     const [
       { data: profile },

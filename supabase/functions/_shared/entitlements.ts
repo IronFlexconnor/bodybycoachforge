@@ -12,6 +12,8 @@ export const FREE_LIMITS = {
   video_per_month: 3,
   nutrition_deep_per_month: 1,
   meal_photo_per_day: 2,
+  program_builds_per_month: 2,
+  auto_adjust_per_month: 4,
 };
 
 export function adminClient() {
